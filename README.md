@@ -26,12 +26,12 @@ masterpiece visual quality can be achieved using only hundreds of strokes.
 
 ### Paint Transformer
 
-![Result](./assets/PaintTransformer/1x2.gif)
+<img src="./assets/PaintTransformer/1x2.gif" width=512>
 
 <details>
   <summary>More samples</summary>
-  <img src="./assets/PaintTransformer/2x2.gif">
-  <img src="./assets/PaintTransformer/3x2.gif">
+  <img src="./assets/PaintTransformer/2x2.gif" width=512>
+  <img src="./assets/PaintTransformer/3x2.gif" width=512>
 </details>
 
 ## Model Weights
