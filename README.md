@@ -26,18 +26,12 @@ masterpiece visual quality can be achieved using only hundreds of strokes.
 
 ### Paint Transformer
 
-<video controls>
-  <source src="./assets/PaintTransformer/1.mp4" type="video/mp4">
-</video>
+![Result](./assets/PaintTransformer/1x2.gif)
 
 <details>
   <summary>More samples</summary>
-  <video controls>
-    <source src="./assets/PaintTransformer/2.mp4" type="video/mp4">
-  </video>
-  <video controls>
-    <source src="./assets/PaintTransformer/3.mp4" type="video/mp4">
-  </video>
+  <img src="./assets/PaintTransformer/2x2.gif">
+  <img src="./assets/PaintTransformer/3x2.gif">
 </details>
 
 ## Model Weights
