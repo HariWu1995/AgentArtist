@@ -1,13 +1,16 @@
 """This module contains simple helper functions """
 from __future__ import print_function
+import os
+
 import torch
 import numpy as np
+
 from PIL import Image
-import os
 
 
 def tensor2im(input_image, imtype=np.uint8):
-    """"Converts a Tensor array into a numpy image array.
+    """"
+    Converts a Tensor array into a numpy image array.
 
     Parameters:
         input_image (tensor) --  the input image tensor array
@@ -28,7 +31,8 @@ def tensor2im(input_image, imtype=np.uint8):
 
 
 def diagnose_network(net, name='network'):
-    """Calculate and print the mean of average absolute(gradients)
+    """
+    Calculate and print the mean of average absolute (gradients)
 
     Parameters:
         net (torch network) -- Torch network
@@ -47,7 +51,8 @@ def diagnose_network(net, name='network'):
 
 
 def save_image(image_numpy, image_path, aspect_ratio=1.0):
-    """Save a numpy image to the disk
+    """
+    Save a numpy image to the disk
 
     Parameters:
         image_numpy (numpy array) -- input numpy array
@@ -65,7 +70,8 @@ def save_image(image_numpy, image_path, aspect_ratio=1.0):
 
 
 def print_numpy(x, val=True, shp=False):
-    """Print the mean, min, max, median, std, and size of a numpy array
+    """
+    Print the mean, min, max, median, std, and size of a numpy array
 
     Parameters:
         val (bool) -- if print the values of the numpy array
@@ -81,7 +87,8 @@ def print_numpy(x, val=True, shp=False):
 
 
 def mkdirs(paths):
-    """create empty directories if they don't exist
+    """
+    create empty directories if they don't exist
 
     Parameters:
         paths (str list) -- a list of directory paths
@@ -94,7 +101,8 @@ def mkdirs(paths):
 
 
 def mkdir(path):
-    """create a single empty directory if it didn't exist
+    """
+    create a single empty directory if it didn't exist
 
     Parameters:
         path (str) -- a single directory path

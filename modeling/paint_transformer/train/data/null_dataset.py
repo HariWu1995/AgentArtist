@@ -1,5 +1,6 @@
-from data.base_dataset import BaseDataset
 import os
+
+from data.base_dataset import BaseDataset
 
 
 class NullDataset(BaseDataset):

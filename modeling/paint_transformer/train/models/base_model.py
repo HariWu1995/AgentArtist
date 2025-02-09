@@ -1,22 +1,26 @@
-import os
-import torch
 from collections import OrderedDict
 from abc import ABC, abstractmethod
+
+import os
+import torch
+
 from . import networks
 
 
 class BaseModel(ABC):
-    """This class is an abstract base class (ABC) for models.
+    """
+    This class is an abstract base class (ABC) for models.
+
     To create a subclass, you need to implement the following five functions:
-        -- <__init__>:                      initialize the class; first call BaseModel.__init__(self, opt).
-        -- <set_input>:                     unpack data from dataset and apply preprocessing.
-        -- <forward>:                       produce intermediate results.
-        -- <optimize_parameters>:           calculate losses, gradients, and update network weights.
+        -- <__init__>:                                   initialize the class; first call BaseModel.__init__(self, opt).
+        -- <set_input>:                                  unpack data from dataset and apply preprocessing.
+        -- <forward>:                                    produce intermediate results.
+        -- <optimize_parameters>:                        calculate losses, gradients, and update network weights.
         -- <modify_commandline_options>:    (optionally) add model-specific options and set default options.
     """
-
     def __init__(self, opt):
-        """Initialize the BaseModel class.
+        """
+        Initialize the BaseModel class.
 
         Parameters:
             opt (Option class)-- stores all the experiment flags; needs to be a subclass of BaseOptions
@@ -45,7 +49,8 @@ class BaseModel(ABC):
 
     @staticmethod
     def modify_commandline_options(parser, is_train):
-        """Add new model-specific options, and rewrite default values for existing options.
+        """
+        Add new model-specific options, and rewrite default values for existing options.
 
         Parameters:
             parser          -- original option parser
@@ -58,7 +63,8 @@ class BaseModel(ABC):
 
     @abstractmethod
     def set_input(self, input):
-        """Unpack input data from the dataloader and perform necessary pre-processing steps.
+        """
+        Unpack input data from the dataloader and perform necessary pre-processing steps.
 
         Parameters:
             input (dict): includes the data itself and its metadata information.
@@ -76,7 +82,8 @@ class BaseModel(ABC):
         pass
 
     def setup(self, opt):
-        """Load and print networks; create schedulers
+        """
+        Load and print networks; create schedulers
 
         Parameters:
             opt (Option class) -- stores all the experiment flags; needs to be a subclass of BaseOptions
@@ -96,7 +103,8 @@ class BaseModel(ABC):
                 net.eval()
 
     def test(self):
-        """Forward function used in test time.
+        """
+        Forward function used in test time.
 
         This function wraps <forward> function in no_grad() so we don't save intermediate steps for backprop
         It also calls <compute_visuals> to produce additional visualization results
@@ -142,7 +150,8 @@ class BaseModel(ABC):
         return errors_ret
 
     def save_networks(self, epoch):
-        """Save all the networks to the disk.
+        """
+        Save all the networks to the disk.
 
         Parameters:
             epoch (int) -- current epoch; used in the file name '%s_net_%s.pth' % (epoch, name)
@@ -163,18 +172,17 @@ class BaseModel(ABC):
         """Fix InstanceNorm checkpoints incompatibility (prior to 0.4)"""
         key = keys[i]
         if i + 1 == len(keys):  # at the end, pointing to a parameter/buffer
-            if module.__class__.__name__.startswith('InstanceNorm') and \
-                    (key == 'running_mean' or key == 'running_var'):
+            if module.__class__.__name__.startswith('InstanceNorm') and (key == 'running_mean' or key == 'running_var'):
                 if getattr(module, key) is None:
                     state_dict.pop('.'.join(keys))
-            if module.__class__.__name__.startswith('InstanceNorm') and \
-               (key == 'num_batches_tracked'):
+            if module.__class__.__name__.startswith('InstanceNorm') and (key == 'num_batches_tracked'):
                 state_dict.pop('.'.join(keys))
         else:
             self.__patch_instance_norm_state_dict(state_dict, getattr(module, key), keys, i + 1)
 
     def load_networks(self, epoch):
-        """Load all the networks from the disk.
+        """
+        Load all the networks from the disk.
 
         Parameters:
             epoch (int) -- current epoch; used in the file name '%s_net_%s.pth' % (epoch, name)
@@ -187,8 +195,8 @@ class BaseModel(ABC):
                 if isinstance(net, torch.nn.DataParallel):
                     net = net.module
                 print('loading the model from %s' % load_path)
-                # if you are using PyTorch newer than 0.4 (e.g., built from
-                # GitHub source), you can remove str() on self.device
+
+                # if you are using PyTorch newer than 0.4, you can remove str() on self.device
                 state_dict = torch.load(load_path, map_location=str(self.device))
                 if hasattr(state_dict, '_metadata'):
                     del state_dict._metadata
@@ -199,7 +207,8 @@ class BaseModel(ABC):
                 net.load_state_dict(state_dict)
 
     def print_networks(self, verbose):
-        """Print the total number of parameters in the network and (if verbose) network architecture
+        """
+        Print the total number of parameters in the network and (if verbose) network architecture
 
         Parameters:
             verbose (bool) -- if verbose: print the network architecture
@@ -217,7 +226,9 @@ class BaseModel(ABC):
         print('-----------------------------------------------')
 
     def set_requires_grad(self, nets, requires_grad=False):
-        """Set requies_grad=Fasle for all the networks to avoid unnecessary computations
+        """
+        Set requies_grad=Fasle for all the networks to avoid unnecessary computations
+
         Parameters:
             nets (network list)   -- a list of networks
             requires_grad (bool)  -- whether the networks require gradients or not
@@ -228,3 +239,4 @@ class BaseModel(ABC):
             if net is not None:
                 for param in net.parameters():
                     param.requires_grad = requires_grad
+

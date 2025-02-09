@@ -42,11 +42,11 @@ masterpiece visual quality can be achieved using only hundreds of strokes.
 
 ## Model Weights
 
+🖼️ Resolution of result is **512**. 
+
+🏋️‍♂️ For higer resolution, please wait for future improvement.
+
 ### Paint Learner with DRL
-
-📺 Resolution of result is **512**. For higer resolution, please wait for future improvement.
-
-⚠️ Remember to rename the checkpoints to **renderer.pkl** and **actor.pkl** and save them to the corresponding folder (e.g. `checkpoints/default`)
 
 - **default** stroke: [renderer.pkl](https://drive.google.com/open?id=1-7dVdjCIZIxh8hHJnGTK-RA1-jL1tor4) and [actor.pkl](https://drive.google.com/open?id=1a3vpKgjCVXHON4P7wodqhCgCMPgg1KeR)
 
@@ -58,21 +58,38 @@ masterpiece visual quality can be achieved using only hundreds of strokes.
 
 ### Paint Transformer
 
-- [Paddle](https://drive.google.com/file/d/1G0O81qSvGp0kFCgyaQHmPygbVHFi1--q/view?usp=sharing) / [PyTorch](https://drive.google.com/file/d/1NDD54BLligyr8tzo8QGI5eihZisXK1nq/view?usp=sharing)
+- **template** stroke: [Paddle](https://drive.google.com/file/d/1G0O81qSvGp0kFCgyaQHmPygbVHFi1--q/view?usp=sharing) / [PyTorch](https://drive.google.com/file/d/1NDD54BLligyr8tzo8QGI5eihZisXK1nq/view?usp=sharing)
+
+<img src="./modeling\paint_transformer\brush\brush_large_horizontal.png" width=125>
+<img src="./modeling\paint_transformer\brush\brush_large_vertical.png" width=125>
 
 ## Features in Future
 
-✅ Code Restructure 
+✅ Code Restructure
+
+⬜ Retrain with high resolution
+
+  - ⬜ 1024
+
+  - ⬜ 2048
+
+⬜ Brushstroke styles
+
+  - ✅ Triangle
+
+  - ✅ Circle
+
+  - ✅ Curve (Bézier)
+
+  - ⬜ ...
 
 ⬜ Simple GUI
 
-⬜ Retrain with high resolution (1024, 2048, 4096)
-
 ⬜ Motion Path with Drawing Hand ([video](https://youtu.be/QQyag99u1sk))
 
-⬜ Tool Control (MS Paint, ...)
+⬜ Tool Control
 
-⬜ Brushstroke styles
+  - ⬜ MS Paint
 
 ## Reference
 

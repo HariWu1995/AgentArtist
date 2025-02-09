@@ -1,6 +1,8 @@
+import math
+
 import paddle
 import paddle.nn as nn
-import math
+
 
 class Painter(nn.Layer):
     """
@@ -20,7 +22,8 @@ class Painter(nn.Layer):
             nn.Pad2D([1, 1, 1, 1], 'reflect'),
             nn.Conv2D(64, 128, 3, 2),
             nn.BatchNorm2D(128),
-            nn.ReLU())
+            nn.ReLU()
+        )
         self.enc_canvas = nn.Sequential(
             nn.Pad2D([1, 1, 1, 1], 'reflect'),
             nn.Conv2D(3, 32, 3, 1),
@@ -33,7 +36,8 @@ class Painter(nn.Layer):
             nn.Pad2D([1, 1, 1, 1], 'reflect'),
             nn.Conv2D(64, 128, 3, 2),
             nn.BatchNorm2D(128),
-            nn.ReLU())
+            nn.ReLU()
+        )
         self.conv = nn.Conv2D(128 * 2, hidden_dim, 1)
         self.transformer = nn.Transformer(hidden_dim, n_heads, n_enc_layers, n_dec_layers)
         self.linear_param = nn.Sequential(
@@ -41,14 +45,12 @@ class Painter(nn.Layer):
             nn.ReLU(),
             nn.Linear(hidden_dim, hidden_dim),
             nn.ReLU(),
-            nn.Linear(hidden_dim, param_per_stroke))
+            nn.Linear(hidden_dim, param_per_stroke)
+        )
         self.linear_decider = nn.Linear(hidden_dim, 1)
-        self.query_pos = paddle.static.create_parameter([total_strokes, hidden_dim], dtype='float32', 
-                                                        default_initializer=nn.initializer.Uniform(0, 1))
-        self.row_embed = paddle.static.create_parameter([8, hidden_dim // 2], dtype='float32', 
-                                                        default_initializer=nn.initializer.Uniform(0, 1))
-        self.col_embed = paddle.static.create_parameter([8, hidden_dim // 2], dtype='float32', 
-                                                        default_initializer=nn.initializer.Uniform(0, 1))
+        self.query_pos = paddle.static.create_parameter([total_strokes, hidden_dim], dtype='float32', default_initializer=nn.initializer.Uniform(0, 1))
+        self.row_embed = paddle.static.create_parameter([8, hidden_dim // 2], dtype='float32', default_initializer=nn.initializer.Uniform(0, 1))
+        self.col_embed = paddle.static.create_parameter([8, hidden_dim // 2], dtype='float32', default_initializer=nn.initializer.Uniform(0, 1))
 
     def forward(self, img, canvas):
         """
@@ -57,6 +59,7 @@ class Painter(nn.Layer):
         b, _, H, W = img.shape
         img_feat = self.enc_img(img)
         canvas_feat = self.enc_canvas(canvas)
+
         h, w = img_feat.shape[-2:]
         feat = paddle.concat([img_feat, canvas_feat], axis=1)
         feat_conv = self.conv(feat)
@@ -72,3 +75,4 @@ class Painter(nn.Layer):
         param = self.linear_param(hidden_state)
         decision = self.linear_decider(hidden_state)
         return param, decision
+

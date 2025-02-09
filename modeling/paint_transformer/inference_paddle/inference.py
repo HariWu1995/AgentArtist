@@ -1,23 +1,29 @@
+import os
+from PIL import Image
+
+import math
+import numpy as np
+import cv2
+
 import torch
 import torch.nn.functional as F
-import numpy as np
-from PIL import Image
-import network
-import os
-import math
-import render_utils
+
 import paddle
 import paddle.nn as nn
 import paddle.nn.functional as F
-import cv2
-import render_parallel
+
+import network
+import render_utils
 import render_serial
+import render_parallel
+
 
 def main(input_path, model_path, output_dir, need_animation=False, resize_h=None, resize_w=None, serial=False):
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
     input_name = os.path.basename(input_path)
     output_path = os.path.join(output_dir, input_name)
+
     frame_dir = None
     if need_animation:
         if not serial:
@@ -60,6 +66,7 @@ def main(input_path, model_path, output_dir, need_animation=False, resize_h=None
     
     print("total infer time:", time.time() - t0)
 
+
 if __name__ == '__main__':
     
     main(input_path='input/chicago.jpg',
@@ -69,3 +76,4 @@ if __name__ == '__main__':
          resize_h=512,         # resize original input to this size. None means do not resize.
          resize_w=512,         # resize original input to this size. None means do not resize.
          serial=True)          # if need animation, serial must be True.
+

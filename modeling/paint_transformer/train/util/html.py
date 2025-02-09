@@ -1,18 +1,24 @@
+import os
+
 import dominate
 from dominate.tags import meta, h3, table, tr, td, p, a, img, br
-import os
 
 
 class HTML:
-    """This HTML class allows us to save images and write texts into a single HTML file.
+    """
+    This HTML class allows us to save images and write texts into a single HTML file.
 
-     It consists of functions such as <add_header> (add a text header to the HTML file),
-     <add_images> (add a row of images to the HTML file), and <save> (save the HTML to the disk).
-     It is based on Python library 'dominate', a Python library for creating and manipulating HTML documents using a DOM API.
+    It consists of functions such as 
+        <add_header> (add a text header to the HTML file),
+        <add_images> (add a row of images to the HTML file), 
+    and <save> (save the HTML to the disk).
+     
+    It is based on Python library 'dominate', a Python library for creating and manipulating HTML documents using a DOM API.
     """
 
     def __init__(self, web_dir, title, refresh=0):
-        """Initialize the HTML classes
+        """
+        Initialize the HTML classes
 
         Parameters:
             web_dir (str) -- a directory that stores the webpage. HTML file will be created at <web_dir>/index.html; images will be saved at <web_dir/images/
@@ -37,7 +43,8 @@ class HTML:
         return self.img_dir
 
     def add_header(self, text):
-        """Insert a header to the HTML file
+        """
+        Insert a header to the HTML file
 
         Parameters:
             text (str) -- the header text
@@ -46,7 +53,8 @@ class HTML:
             h3(text)
 
     def add_images(self, ims, txts, links, width=400):
-        """add images to the HTML file
+        """
+        Add images to the HTML file
 
         Parameters:
             ims (str list)   -- a list of image paths
@@ -82,5 +90,6 @@ if __name__ == '__main__':  # we show an example usage here.
         ims.append('image_%d.png' % n)
         txts.append('text_%d' % n)
         links.append('image_%d.png' % n)
+
     html.add_images(ims, txts, links)
     html.save()
