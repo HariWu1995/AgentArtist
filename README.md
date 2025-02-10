@@ -92,7 +92,15 @@ masterpiece **visual quality** can be achieved using only hundreds of strokes.
 
 2. **Paint Transformer**: Feed-Forward Neural Painting with *Stroke Prediction* ([Paper](https://arxiv.org/abs/2108.03798) | [Code/Paddle](https://github.com/wzmsltw/PaintTransformer) | [Code/Torch](https://github.com/Huage001/PaintTransformer) | [Demo](https://huggingface.co/spaces/akhaliq/PaintTransformer))
 
-3. Learning to Generate **Line Drawings** that convey *Geometry* and *Semantics* ([Paper](https://arxiv.org/abs/2203.12691) | [Code](https://github.com/carolineec/informative-drawings) | [Demo](https://github.com/carolineec/informative-drawings))
+<details>
+
+  <summary>Style Transfer</summary>
+
+  3. Learning to Generate **Line Drawings** that convey *Geometry* and *Semantics* ([Paper](https://arxiv.org/abs/2203.12691) | [Code](https://github.com/carolineec/informative-drawings) | [Demo](https://github.com/carolineec/informative-drawings))
+
+  4. CSGO: **Content-Style Composition** in Text-to-Image Generation ([Paper](https://arxiv.org/abs/2408.16766) | [Code](https://github.com/instantX-research/CSGO) | [Demo](https://huggingface.co/spaces/xingpng/CSGO))
+
+</details>
   
 ## 🧹 Brushes
 
