@@ -1,15 +1,15 @@
-# AI Agent as an Artist
+# AI Agent as any Artist
 
-## Abstract
+## 📝 Abstract
 
-- To teach AI to draw any painting like human, who can use a small number of strokes to create masterpiece paintings.
+- **AI application** to draw any painting like human, who can use a small number of strokes to create masterpiece paintings.
 
 - Experiments demonstrate that
-masterpiece visual quality can be achieved using only hundreds of strokes. 
+masterpiece **visual quality** can be achieved using only hundreds of strokes. 
 
 - The training process does not require any ~~supervised data~~. 
 
-## Demo
+## 🎬 Demo
 
 ### Paint Learner with DRL
 
@@ -34,7 +34,7 @@ masterpiece visual quality can be achieved using only hundreds of strokes.
   <img src="./assets/PaintTransformer/3x2.gif" width=512>
 </details>
 
-## Model Weights
+## 🔢 Model Weights
 
 🖼️ Resolution of result is **512**. 
 
@@ -57,7 +57,7 @@ masterpiece visual quality can be achieved using only hundreds of strokes.
 <img src="./modeling\paint_transformer\brush\brush_large_horizontal.png" width=125>
 <img src="./modeling\paint_transformer\brush\brush_large_vertical.png" width=125>
 
-## Features in Future
+## 🦾 Features 🦿
 
 ✅ Code Restructure
 
@@ -81,15 +81,25 @@ masterpiece visual quality can be achieved using only hundreds of strokes.
 
 ⬜ Motion Path with Drawing Hand ([video](https://youtu.be/QQyag99u1sk))
 
-⬜ Tool Control
+⬜ Tool Control with advanced Brushes
 
-  - ⬜ MS Paint
+  - ⬜ MS Paint 
 
-## Reference
+## 🔎 Reference
 
 1. Learning to Paint with **Model-based Deep Reinforcement Learning** ([Paper](https://arxiv.org/pdf/1903.04411) | [Code](https://github.com/hzwer/ICCV2019-LearningToPaint) | [Demo](https://replicate.com/hzwer/iccv2019-learningtopaint)) 
-<img src="./assets/LearnToPaint.png">
+<img src="./assets/learn2paint/poster.png">
 
 2. **Paint Transformer**: Feed-Forward Neural Painting with *Stroke Prediction* ([Paper](https://arxiv.org/abs/2108.03798) | [Code/Paddle](https://github.com/wzmsltw/PaintTransformer) | [Code/Torch](https://github.com/Huage001/PaintTransformer) | [Demo](https://huggingface.co/spaces/akhaliq/PaintTransformer))
 
 3. Learning to Generate **Line Drawings** that convey *Geometry* and *Semantics* ([Paper](https://arxiv.org/abs/2203.12691) | [Code](https://github.com/carolineec/informative-drawings) | [Demo](https://github.com/carolineec/informative-drawings))
+  
+## 🧹 Brushes
+
+- MS Paint
+
+  <img src="./assets/brushes_mspaint.png" height=250>
+
+- Procreate
+
+  <img src="./assets/brushes_procreate.jpg" height=250>
