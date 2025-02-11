@@ -12,6 +12,7 @@ from torch.autograd import Variable
 def conv3x3(in_planes, out_planes, stride=1):
     return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride, padding=1, bias=False)
 
+
 def cfg(depth):
     depth_lst = [18, 34, 50, 101, 152]
     assert (depth in depth_lst), \

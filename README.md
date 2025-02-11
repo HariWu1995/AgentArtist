@@ -36,9 +36,9 @@ masterpiece **visual quality** can be achieved using only hundreds of strokes.
 
 ## 🔢 Model Weights
 
-🖼️ Resolution of result is **512**. 
+🖼️ Resolution of result is **128**. 
 
-🏋️‍♂️ For higer resolution, please wait for future improvement.
+🏋️‍♂️ For higer resolution, apply patch processing in parallel.
 
 ### Paint Learner with DRL
 
@@ -61,11 +61,7 @@ masterpiece **visual quality** can be achieved using only hundreds of strokes.
 
 ✅ Code Restructure
 
-⬜ Retrain with high resolution
-
-  - ⬜ 1024
-
-  - ⬜ 2048
+✅ Patch Processing for higher resolution
 
 ⬜ Brushstroke styles
 
