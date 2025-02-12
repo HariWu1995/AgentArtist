@@ -30,36 +30,53 @@ SEQ_LEN = 5
 #################################
 
 def load_models(path_to_painter: str, 
-                path_to_renderer: str, ):
+                path_to_renderer: str = None):
 
     # Load painter (actor) model -> ResNet 18
-    #               action_bundle = 5, 
+    #               action bundle = 5, 
     #     quadratic Bézier curve = 10,
     #               color channel = 3,
     #                  => outputs = 5 * (10 + 3) = 65
     painter = ResNet(num_inputs=9, depth=18, num_outputs=65)
     painter.load_state_dict(torch.load(path_to_painter), strict=False)
+    painter = painter.to(device=DEVICE).eval()
 
     # Load neural renderer
-    renderer = FCN()
-    renderer.load_state_dict(torch.load(path_to_renderer), strict=False)
-
-    # Send to device
-    painter = painter.to(device=DEVICE).eval()
-    renderer = renderer.to(device=DEVICE).eval()
+    if path_to_renderer is not None:
+        renderer = FCN()
+        renderer.load_state_dict(torch.load(path_to_renderer), strict=False)
+        renderer = renderer.to(device=DEVICE).eval()
+    else:
+        renderer = None
 
     return painter, renderer
 
 
-def render(x, width, canvas, renderer):
-    
-    # b * (10 + 3)
-    x = x.view(-1, 10 + 3)
+def render(actions, width, canvas, renderer = None):
 
-    stroke = 1 - renderer(x[:, :10])
+    # actions = actions.view(-1, 10 + 3)
+    stroke_params = actions[:, :10]
+
+    if renderer is not None:
+        # Neural rendering
+        stroke_new = renderer(stroke_params)
+
+    else:
+        # Algorithmic rendering
+        stroke_params = stroke_params.detach().cpu().numpy().tolist()
+
+        stroke_new = []
+        for param in stroke_params:
+            stroke_draw = draw_curve(param, width)
+            stroke_draw = torch.tensor(stroke_draw)
+            stroke_new.append(stroke_draw)
+
+        stroke_new = torch.stack(stroke_new, dim=0).to(device=DEVICE)
+
+    stroke = 1 - stroke_new
     stroke = stroke.view(-1, width, width, 1)
 
-    colorgb = stroke * x[:, -3:].view(-1, 1, 1, 3)
+    colorgb = stroke * actions[:, -3:].view(-1, 1, 1, 3)
 
     stroke = stroke.permute(0, 3, 1, 2)
     colorgb = colorgb.permute(0, 3, 1, 2)
@@ -71,6 +88,7 @@ def render(x, width, canvas, renderer):
     for i in range(SEQ_LEN):
         canvas = canvas * (1 - stroke[:, i]) + colorgb[:, i]
         re5ult.append(canvas)
+    
     return canvas, re5ult
 
 
@@ -110,6 +128,7 @@ def run_pipeline(
     num_canvas = division * division
     img_count = 0
     img_stack = []
+    guidance = []  # to reproduce w/o running model
 
     # if division > 1:
     #     max_step = max_step // 2
@@ -124,8 +143,10 @@ def run_pipeline(
     for i in lowres_bar:
         step = T * i / lowres_step
         inputs = torch.cat([canvas, sized_img, step, C], dim=1)
-        actions = painter(inputs)
+        actions = painter(inputs).view(-1, 10 + 3)
         canvas, re5ult = render(actions, width, canvas, renderer)
+
+        guidance.append(actions)
         
         loss = ((canvas - sized_img) ** 2).mean()
         log = f'step {i}, L2Loss = {loss:.5f}'
@@ -153,8 +174,10 @@ def run_pipeline(
     for i in hires_bar:
         step = T * i / hires_step
         inputs = torch.cat([canvas, patch_img, step, C], dim=1)
-        actions = painter(inputs)
+        actions = painter(inputs).view(-1, 10 + 3)
         canvas, re5ult = render(actions, width, canvas, renderer)
+
+        guidance.append(actions)
 
         loss = ((canvas - patch_img) ** 2).mean()
         log = f'step {i}, L2Loss = {loss:.5f}'
@@ -166,7 +189,9 @@ def run_pipeline(
             img_stack.append(res)
             img_count += 1
 
-    return img_stack
+    guidance = torch.cat(guidance, dim=0).detach().cpu().numpy().tolist()
+
+    return img_stack, guidance
 
 
 if __name__ == "__main__":
@@ -174,25 +199,33 @@ if __name__ == "__main__":
     # Load models
     painter_ckpt_path = './checkpoints/paint_ddpg_sbr/default/actor.pkl'
     renderer_ckpt_path = './checkpoints/paint_ddpg_sbr/default/renderer.pkl'
-    painter, renderer = load_models(painter_ckpt_path, renderer_ckpt_path)
+    painter, renderer = load_models(painter_ckpt_path)
 
     # Load image
-    # image_path = "C:/Users/Mr. RIAH/Pictures/_character/Nancy-Closeup.jpg"
-    image_path = "./samples/van-gogh-garden-at-arles.png"
+    image_path = "C:/Users/Mr. RIAH/Pictures/_character/Nancy-Closeup.jpg"
+    # image_path = "./samples/van-gogh-garden-at-arles.png"
     image_size = 1024
     image = cv2.imread(image_path, cv2.IMREAD_COLOR)
-    image = cv2.copyMakeBorder(image, (852-552)//2, (852-552)//2, 0, 0, cv2.BORDER_CONSTANT)
+    # image = cv2.copyMakeBorder(image, (852-552)//2, (852-552)//2, 0, 0, cv2.BORDER_CONSTANT)
     image = cv2.resize(image, (image_size, image_size))
 
     # Run pipeline
-    D = int(image_size / WIDTH)
-    out_dir = f'./results/van_gogh_02_{image_size}'
+    division = int(image_size / WIDTH)
+    out_dir = f'./results/nancy_{image_size}'
     with torch.no_grad():
-        images_list = run_pipeline(painter, renderer, image,
-                                    width = WIDTH, division = D,
-                                  verbose = True, out_dir = out_dir, 
-                                hires_step = 20, lowres_step = 50)
+        images_list, guidance = run_pipeline(painter, renderer, image,
+                                                width = WIDTH, division = division,
+                                                verbose = True, out_dir = out_dir, 
+                                            hires_step = 20, lowres_step = 50)
+
+    # Save guidance
+    print('\nSaving guidance ...')
+    with open(f'{out_dir}/guidance.txt', 'w') as fwriter:
+        fwriter.write('step,x0,y0,x1,y1,x2,y2,z0,z2,w0,w2,r,g,b')
+        for i, param in enumerate(guidance):
+            fwriter.write('\n' + ','.join([str(p) for p in [i+1]+param]))
 
     # Animation
+    print('\nMaking GIF ...')
     make_gif(images_list, out_path=f'{out_dir}/out.gif')
 

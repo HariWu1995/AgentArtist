@@ -71,7 +71,8 @@ masterpiece **visual quality** can be achieved using only hundreds of strokes.
 
   - ✅ Circle
 
-  - ✅ Curve (Bézier)
+  - ✅ Curve ([Bézier](https://pomax.github.io/bezierinfo/))
+  <img src="./assets/bezier_curve_quadratic.png">
 
   - ⬜ ...
 

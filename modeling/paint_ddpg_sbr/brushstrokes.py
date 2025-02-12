@@ -6,8 +6,21 @@ def normal(x, width):
     return (int)(x * (width - 1) + 0.5)
 
 
-def draw_curve(f, width: int = 128):
-
+def draw_curve(f, width: int = 128, num_steps: int = 100):
+    """
+    - 3 control points: 
+        [x0, y0], 
+        [x1, y1], 
+        [x2, y2]
+        
+    - thickness of 2 endpoints: 
+        [x0, y0] -> z0, 
+        [x2, y2] -> z2 
+        
+    - transparency of 2 endpoints: 
+        [x0, y0] -> w0, 
+        [x2, y2] -> w2 
+    """
     x0, y0, x1, y1, x2, y2, z0, z2, w0, w2 = f
     
     x1 = x0 + (x2 - x0) * x1
@@ -25,9 +38,10 @@ def draw_curve(f, width: int = 128):
     z2 = (int)(1 + z2 * width // 2)
 
     canvas = np.zeros([width * 2, width * 2]).astype('float32')
-    tmp = 1. / 100
-    for i in range(100):
-        t = i * tmp
+
+    step = 1. / num_steps
+    for i in range(num_steps):
+        t = i * step
         x = (int)((1-t) * (1-t) * x0 + 2 * t * (1-t) * x1 + t * t * x2)
         y = (int)((1-t) * (1-t) * y0 + 2 * t * (1-t) * y1 + t * t * y2)
         z = (int)((1-t) * z0 + t * z2)
