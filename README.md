@@ -11,17 +11,17 @@ masterpiece **visual quality** can be achieved using only hundreds of strokes.
 
 ## 🎬 Demo
 
-### Paint Learner with DRL
+### Paint Learner with DDPG (Deep Deterministic Policy Gradient) + SBR (Stroke-based Rendering)
 
-![Sample](./samples/monalisa.png) 🠊 ![Result](./assets/learn2paint/monalisa.gif)
+![Sample](./samples/monalisa.png) 🠊 ![Result](./assets/PaintDDPG/monalisa.gif)
 
 <details>
   <summary>More samples</summary>
-  <img src="./assets/learn2paint/sunrise.gif">
-  <img src="./assets/learn2paint/sunflower.gif">
-  <img src="./assets/learn2paint/palacemuseum.gif">
-  <img src="./assets/learn2paint/deepdream_night.gif">
-  <img src="./assets/learn2paint/deepdream_bird.gif">
+  <img src="./assets/PaintDDPG/sunrise.gif">
+  <img src="./assets/PaintDDPG/sunflower.gif">
+  <img src="./assets/PaintDDPG/palacemuseum.gif">
+  <img src="./assets/PaintDDPG/deepdream_night.gif">
+  <img src="./assets/PaintDDPG/deepdream_bird.gif">
 </details>
 
 ### Paint Transformer
@@ -40,7 +40,7 @@ masterpiece **visual quality** can be achieved using only hundreds of strokes.
 
 🏋️‍♂️ For higer resolution, apply patch processing in parallel.
 
-### Paint Learner with DRL
+### Paint Learner with DDPG (Deep Deterministic Policy Gradient) + SBR (Stroke-based Rendering)
 
 - **default** stroke: [renderer.pkl](https://drive.google.com/open?id=1-7dVdjCIZIxh8hHJnGTK-RA1-jL1tor4) and [actor.pkl](https://drive.google.com/open?id=1a3vpKgjCVXHON4P7wodqhCgCMPgg1KeR)
 
@@ -84,7 +84,7 @@ masterpiece **visual quality** can be achieved using only hundreds of strokes.
 ## 🔎 Reference
 
 1. Learning to Paint with **Model-based Deep Reinforcement Learning** ([Paper](https://arxiv.org/pdf/1903.04411) | [Code](https://github.com/hzwer/ICCV2019-LearningToPaint) | [Demo](https://replicate.com/hzwer/iccv2019-learningtopaint)) 
-<img src="./assets/learn2paint/poster.png">
+<img src="./assets/PaintDDPG/poster.png">
 
 2. **Paint Transformer**: Feed-Forward Neural Painting with *Stroke Prediction* ([Paper](https://arxiv.org/abs/2108.03798) | [Code/Paddle](https://github.com/wzmsltw/PaintTransformer) | [Code/Torch](https://github.com/Huage001/PaintTransformer) | [Demo](https://huggingface.co/spaces/akhaliq/PaintTransformer))
 <img src="./assets/PaintTransformer/abstract.png">
