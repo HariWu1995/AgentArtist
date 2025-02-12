@@ -77,16 +77,19 @@ masterpiece **visual quality** can be achieved using only hundreds of strokes.
 
 ✅ Patch Processing for higher resolution
 
-⬜ Brushstroke styles
+🔜 Brushstrokes
 
   - ✅ Triangle
 
   - ✅ Circle
 
   - ✅ Curve ([Bézier](https://pomax.github.io/bezierinfo/))
-  <img src="./assets/bezier_curve_quadratic.png">
+    
+    <img src="./assets/bezier_curve_quadratic.png">
 
-  - ⬜ ...
+  - 🔜 Advanced
+
+    <img src="./assets/brushes_mspaint.png" height=200>
 
 ⬜ Simple GUI
 
@@ -115,11 +118,5 @@ masterpiece **visual quality** can be achieved using only hundreds of strokes.
 </details>
   
 ## 🧹 Brushes
-
-- MS Paint
-
-  <img src="./assets/brushes_mspaint.png" height=250>
-
-- Procreate
 
   <img src="./assets/brushes_procreate.jpg" height=250>

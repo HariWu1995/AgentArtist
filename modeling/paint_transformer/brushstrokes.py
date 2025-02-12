@@ -86,7 +86,8 @@ def drawing(param, H, W, brushes):
     color_map = color_map.unsqueeze(-1).unsqueeze(-1).repeat(1, 1, H, W)
     foreground = brush * color_map
 
-    # Dilation and erosion are used for foregrounds and alphas respectively to prevent artifacts on stroke borders.
+    # Dilation and erosion are used for foregrounds and alphas respectively 
+    #   to prevent artifacts on stroke borders.
     foreground = dilation(foreground)
     alphas = erosion(alphas)
 
