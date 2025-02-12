@@ -77,7 +77,7 @@ masterpiece **visual quality** can be achieved using only hundreds of strokes.
 
 ✅ Patch Processing for higher resolution
 
-🔜 Brushstrokes
+✅ Brushstrokes
 
   - ✅ Triangle
 
@@ -87,10 +87,6 @@ masterpiece **visual quality** can be achieved using only hundreds of strokes.
     
     <img src="./assets/bezier_curve_quadratic.png">
 
-  - 🔜 Advanced
-
-    <img src="./assets/brushes_mspaint.png" height=250>
-
 ⬜ Simple GUI
 
 ⬜ Motion Path with Drawing Hand ([video](https://youtu.be/QQyag99u1sk))
@@ -98,6 +94,8 @@ masterpiece **visual quality** can be achieved using only hundreds of strokes.
 ⬜ Tool Control with advanced Brushes
 
   - ⬜ MS Paint 
+
+    <img src="./assets/brushes_mspaint.png" height=250>
 
 ## 🔎 Reference
 
