@@ -17,6 +17,18 @@ masterpiece **visual quality** can be achieved using only hundreds of strokes.
 
 <details>
   <summary>More samples</summary>
+  <img src="./samples/Fernando-Botero-Mona-Lisa.gif">
+  <img src="./samples/MidJourney-1er-prix-Colorado-State-Fair.gif">
+  <img src="./samples/pablo-picasso-mediterranean-landscape.gif">
+  <img src="./samples/pablo-picasso-the-dream.gif">
+  <img src="./samples/salvador-dali-combined-paintings.gif">
+  <img src="./samples/salvador-dali-Galatea-of-the-Spheres.gif">
+  <img src="./samples/van-gogh-garden-at-arles.gif">
+  <img src="./samples/van-gogh-starry-night.gif">
+</details>
+
+<details>
+  <summary>Much More samples</summary>
   <img src="./assets/PaintDDPG/sunrise.gif">
   <img src="./assets/PaintDDPG/sunflower.gif">
   <img src="./assets/PaintDDPG/palacemuseum.gif">
