@@ -17,23 +17,23 @@ masterpiece **visual quality** can be achieved using only hundreds of strokes.
 
 <details>
   <summary>More samples</summary>
-  <img src="./samples/Fernando-Botero-Mona-Lisa.gif">
-  <img src="./samples/MidJourney-1er-prix-Colorado-State-Fair.gif">
-  <img src="./samples/pablo-picasso-mediterranean-landscape.gif">
-  <img src="./samples/pablo-picasso-the-dream.gif">
-  <img src="./samples/salvador-dali-combined-paintings.gif">
-  <img src="./samples/salvador-dali-Galatea-of-the-Spheres.gif">
-  <img src="./samples/van-gogh-garden-at-arles.gif">
-  <img src="./samples/van-gogh-starry-night.gif">
+  <img src="./samples/Fernando-Botero-Mona-Lisa.gif" width=256>
+  <img src="./samples/MidJourney-1er-prix-Colorado-State-Fair.gif" width=256>
+  <img src="./samples/pablo-picasso-mediterranean-landscape.gif" width=256>
+  <img src="./samples/pablo-picasso-the-dream.gif" width=256>
+  <img src="./samples/salvador-dali-combined-paintings.gif" width=256>
+  <img src="./samples/salvador-dali-Galatea-of-the-Spheres.gif" width=256>
+  <img src="./samples/van-gogh-garden-at-arles.gif" width=256>
+  <img src="./samples/van-gogh-starry-night.gif" width=256>
 </details>
 
 <details>
   <summary>Much More samples</summary>
-  <img src="./assets/PaintDDPG/sunrise.gif">
-  <img src="./assets/PaintDDPG/sunflower.gif">
-  <img src="./assets/PaintDDPG/palacemuseum.gif">
-  <img src="./assets/PaintDDPG/deepdream_night.gif">
-  <img src="./assets/PaintDDPG/deepdream_bird.gif">
+  <img src="./assets/PaintDDPG/sunrise.gif" width=256>
+  <img src="./assets/PaintDDPG/sunflower.gif" width=256>
+  <img src="./assets/PaintDDPG/palacemuseum.gif" width=256>
+  <img src="./assets/PaintDDPG/deepdream_night.gif" width=256>
+  <img src="./assets/PaintDDPG/deepdream_bird.gif" width=256>
 </details>
 
 ### Paint Transformer
