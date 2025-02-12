@@ -89,7 +89,7 @@ masterpiece **visual quality** can be achieved using only hundreds of strokes.
 
   - 🔜 Advanced
 
-    <img src="./assets/brushes_mspaint.png" height=200>
+    <img src="./assets/brushes_mspaint.png" height=250>
 
 ⬜ Simple GUI
 
