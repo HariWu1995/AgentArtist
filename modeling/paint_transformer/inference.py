@@ -437,7 +437,6 @@ def run_pipeline(
         painter,
         brushes,
         image: Image.Image or str,
-    run_parallel: bool = False,
         verbose: bool = False,
         out_dir: str = './results',
     ):
@@ -500,11 +499,8 @@ def run_pipeline(
         param[...,  :2] = param[...,  :2] / 2 + 0.25
         param[..., 2:4] = param[..., 2:4] / 2
 
-        if run_parallel:
-            final_result = param2img_parallel(param, decision, brushes, final_result)
-        else:
-            final_result = param2img_sequential(param, decision, brushes, final_result, 
-                                                out_dir, False, original_h, original_w, layer)
+        final_result = param2img_sequential(param, decision, brushes, final_result, 
+                                            out_dir, False, original_h, original_w, layer)
 
         if verbose:
             loss = ((final_result - original_img) ** 2).mean()
@@ -558,11 +554,8 @@ def run_pipeline(
     param[...,  :2] = param[...,  :2] / 2 + 0.25
     param[..., 2:4] = param[..., 2:4] / 2
 
-    if run_parallel:
-        final_result = param2img_parallel(param, decision, brushes, final_result)
-    else:
-        final_result = param2img_sequential(param, decision, brushes, final_result, 
-                                            out_dir, True, original_h, original_w, layer+1)
+    final_result = param2img_sequential(param, decision, brushes, final_result, 
+                                        out_dir, True, original_h, original_w, layer+1)
     
     final_result = final_result[:, :, border_size:-border_size, border_size:-border_size]
     final_result = crop(final_result, original_h, original_w)
@@ -595,8 +588,7 @@ if __name__ == '__main__':
     # Run pipeline
     out_dir = f'./results/nancy_{image_size}'
     with torch.no_grad():
-        run_pipeline(painter, brushes, image,
-                    run_parallel=False, verbose=True, out_dir=out_dir)
+        run_pipeline(painter, brushes, image, verbose=True, out_dir=out_dir)
 
     # Animation
     images_list = [Image.open(f) for f in glob(f'{out_dir}/*.jpg')]
