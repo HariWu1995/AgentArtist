@@ -13,10 +13,19 @@ masterpiece **visual quality** can be achieved using only hundreds of strokes.
 
 ### Paint Learner with DDPG (Deep Deterministic Policy Gradient) + SBR (Stroke-based Rendering)
 
-![Sample](./samples/monalisa.png) 🠊 ![Result](./assets/PaintDDPG/monalisa.gif)
+<!-- ![Sample](./samples/monalisa.png) 🠊 ![Result](./assets/PaintDDPG/monalisa.gif) -->
+![Sample](./samples/Fernando-Botero-Mona-Lisa.jpg) 🠊 ![Result](./samples/Fernando-Botero-Mona-Lisa.gif)
+![Sample](./samples/MidJourney-1er-prix-Colorado-State-Fair.png) 🠊 ![Result](./samples/MidJourney-1er-prix-Colorado-State-Fair.gif)
+![Sample](./samples/pablo-picasso-mediterranean-landscape.jpg) 🠊 ![Result](./samples/pablo-picasso-mediterranean-landscape.gif)
+![Sample](./samples/pablo-picasso-the-dream.jpg) 🠊 ![Result](./samples/pablo-picasso-the-dream.gif)
+![Sample](./samples/salvador-dali-combined-paintings.jpg) 🠊 ![Result](./samples/salvador-dali-combined-paintings.gif)
+![Sample](./samples/salvador-dali-Galatea-of-the-Spheres.jpg) 🠊 ![Result](./samples/salvador-dali-Galatea-of-the-Spheres.gif)
+![Sample](./samples/van-gogh-garden-at-arles.png) 🠊 ![Result](./samples/van-gogh-garden-at-arles.gif)
+![Sample](./samples/van-gogh-starry-night.png) 🠊 ![Result](./samples/van-gogh-starry-night.gif)
 
 <details>
   <summary>More samples</summary>
+  <img src="./assets/PaintDDPG/monalisa.gif">
   <img src="./assets/PaintDDPG/sunrise.gif">
   <img src="./assets/PaintDDPG/sunflower.gif">
   <img src="./assets/PaintDDPG/palacemuseum.gif">
