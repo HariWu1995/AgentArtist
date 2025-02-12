@@ -20,6 +20,7 @@ from modeling.paint_ddpg_sbr.utilities import preprocess, postprocess, make_gif
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 DTYPE = torch.float32
+
 WIDTH = 128
 SEQ_LEN = 5
 

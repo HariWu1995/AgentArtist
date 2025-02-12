@@ -36,11 +36,11 @@ masterpiece **visual quality** can be achieved using only hundreds of strokes.
 
 ## 🔢 Model Weights
 
-🖼️ Resolution of result is **128**. 
-
-🏋️‍♂️ For higer resolution, apply patch processing in parallel.
-
 ### Paint Learner with DDPG (Deep Deterministic Policy Gradient) + SBR (Stroke-based Rendering)
+
+🖼️ Resolution of model output is **128** x **128**. 
+
+📱 For higher resolution, apply patch processing in parallel.
 
 - **default** stroke: [renderer.pkl](https://drive.google.com/open?id=1-7dVdjCIZIxh8hHJnGTK-RA1-jL1tor4) and [actor.pkl](https://drive.google.com/open?id=1a3vpKgjCVXHON4P7wodqhCgCMPgg1KeR)
 
@@ -52,8 +52,12 @@ masterpiece **visual quality** can be achieved using only hundreds of strokes.
 
 ### Paint Transformer
 
+🖼️ Resolution of model output is **512** x **512**. 
+
+📱 For higher resolution, apply patch processing in parallel.
+
 - **template** stroke: [Paddle](https://drive.google.com/file/d/1G0O81qSvGp0kFCgyaQHmPygbVHFi1--q/view?usp=sharing) / [PyTorch](https://drive.google.com/file/d/1NDD54BLligyr8tzo8QGI5eihZisXK1nq/view?usp=sharing)
-- **horizontal** / **vertical** stroke: <img src="./modeling/paint_transformer/brush/brush_large_horizontal.png" width=50> | <img src="./modeling/paint_transformer/brush/brush_large_vertical.png" width=50>
+- **horizontal** / **vertical** stroke: <img src="./checkpoints/paint_transformer/brush/brush_large_horizontal.png" width=50> / <img src="./checkpoints/paint_transformer/brush/brush_large_vertical.png" width=50>
 
 ## 🦾 Features 🦿
 

@@ -23,7 +23,9 @@ class SignWithSigmoidGrad(torch.autograd.Function):
 
 class Painter(nn.Module):
 
-    def __init__(self, param_per_stroke, total_strokes, hidden_dim, n_heads=8, n_enc_layers=3, n_dec_layers=3):
+    def __init__(self, param_per_stroke, total_strokes, 
+                hidden_dim, n_heads: int = 8, n_enc_layers: int = 3, n_dec_layers: int = 3):
+
         super().__init__()
         self.enc_img = nn.Sequential(
             nn.ReflectionPad2d(1),
@@ -69,9 +71,12 @@ class Painter(nn.Module):
 
     def forward(self, img, canvas):
         b, _, H, W = img.shape
+
         img_feat = self.enc_img(img)
         canvas_feat = self.enc_canvas(canvas)
+        
         h, w = img_feat.shape[-2:]
+        
         feat = torch.cat([img_feat, canvas_feat], dim=1)
         feat_conv = self.conv(feat)
 
@@ -79,9 +84,14 @@ class Painter(nn.Module):
             self.col_embed[:w].unsqueeze(0).contiguous().repeat(h, 1, 1),
             self.row_embed[:h].unsqueeze(1).contiguous().repeat(1, w, 1),
         ], dim=-1).flatten(0, 1).unsqueeze(1)
-        hidden_state = self.transformer(pos_embed + feat_conv.flatten(2).permute(2, 0, 1).contiguous(),
-                                        self.query_pos.unsqueeze(1).contiguous().repeat(1, b, 1))
+
+        source_to_encoder = pos_embed + feat_conv.flatten(2).permute(2, 0, 1).contiguous()
+        target_to_decoder = self.query_pos.unsqueeze(1).contiguous().repeat(1, b, 1)
+
+        hidden_state = self.transformer(source_to_encoder, target_to_decoder)
         hidden_state = hidden_state.permute(1, 0, 2).contiguous()
+
         param = self.linear_param(hidden_state)
         decision = self.linear_decider(hidden_state)
+
         return param, decision

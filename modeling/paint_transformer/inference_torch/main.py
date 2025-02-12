@@ -276,7 +276,7 @@ def param2img_parallel(param, decision, meta_brushes, cur_canvas):
     H, W = cur_canvas.shape[-2:]
 
     is_odd_y = h % 2 == 1
-    is_odd_x = w % 2 == 
+    is_odd_x = w % 2 == 1
     
     patch_size_y = 2 * H // h
     patch_size_x = 2 * W // w
