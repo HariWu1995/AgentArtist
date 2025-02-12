@@ -53,9 +53,7 @@ masterpiece **visual quality** can be achieved using only hundreds of strokes.
 ### Paint Transformer
 
 - **template** stroke: [Paddle](https://drive.google.com/file/d/1G0O81qSvGp0kFCgyaQHmPygbVHFi1--q/view?usp=sharing) / [PyTorch](https://drive.google.com/file/d/1NDD54BLligyr8tzo8QGI5eihZisXK1nq/view?usp=sharing)
-
-<img src="./modeling/paint_transformer/brush/brush_large_horizontal.png" width=125>
-<img src="./modeling/paint_transformer/brush/brush_large_vertical.png" width=125>
+- <img src="./modeling/paint_transformer/brush/brush_large_horizontal.png" width=125> <img src="./modeling/paint_transformer/brush/brush_large_vertical.png" width=125>
 
 ## 🦾 Features 🦿
 
