@@ -4,8 +4,7 @@
 
 - **AI application** to draw any painting like human, who can use a small number of strokes to create masterpiece paintings.
 
-- Experiments demonstrate that
-masterpiece **visual quality** can be achieved using only hundreds of strokes. 
+- Experiments demonstrate that masterpiece **visual quality** can be achieved using only hundreds of strokes. 
 
 - The training process does not require any ~~supervised data~~. 
 
@@ -52,7 +51,7 @@ masterpiece **visual quality** can be achieved using only hundreds of strokes.
 
 🖼️ Resolution of model output is **128** x **128**. 
 
-📱 For higher resolution, apply patch processing in parallel.
+📱 For higher resolution, apply **patch processing** in parallel.
 
 - **default** stroke: [renderer.pkl](https://drive.google.com/open?id=1-7dVdjCIZIxh8hHJnGTK-RA1-jL1tor4) and [actor.pkl](https://drive.google.com/open?id=1a3vpKgjCVXHON4P7wodqhCgCMPgg1KeR)
 
@@ -66,10 +65,14 @@ masterpiece **visual quality** can be achieved using only hundreds of strokes.
 
 🖼️ Resolution of model output is **512** x **512**. 
 
-📱 For higher resolution, apply patch processing in parallel.
+📱 For higher resolution, apply **patch processing** in parallel.
 
-- **template** stroke: [Paddle](https://drive.google.com/file/d/1G0O81qSvGp0kFCgyaQHmPygbVHFi1--q/view?usp=sharing) / [PyTorch](https://drive.google.com/file/d/1NDD54BLligyr8tzo8QGI5eihZisXK1nq/view?usp=sharing)
-- **horizontal** / **vertical** stroke: <img src="./checkpoints/paint_transformer/brush/brush_large_horizontal.png" width=50> / <img src="./checkpoints/paint_transformer/brush/brush_large_vertical.png" width=50>
+- Checkpoint: [Paddle](https://drive.google.com/file/d/1G0O81qSvGp0kFCgyaQHmPygbVHFi1--q/view?usp=sharing) / [PyTorch](https://drive.google.com/file/d/1NDD54BLligyr8tzo8QGI5eihZisXK1nq/view?usp=sharing)
+
+- Primitive brushes: 
+  - **horizontal** <img src="./checkpoints/paint_transformer/brush/brush_large_horizontal.png" width=50>
+  - **vertical** <img src="./checkpoints/paint_transformer/brush/brush_large_vertical.png" width=50>
+  - **rendering** (diffentiable): <img src="./assets/PaintTransformer/metabrush.png" width=250>
 
 ## 🦾 Features 🦿
 
@@ -87,6 +90,8 @@ masterpiece **visual quality** can be achieved using only hundreds of strokes.
     
     <img src="./assets/bezier_curve_quadratic.png">
 
+  - ✅ Template
+
 ⬜ Simple GUI
 
 ⬜ Motion Path with Drawing Hand ([video](https://youtu.be/QQyag99u1sk))
@@ -96,6 +101,8 @@ masterpiece **visual quality** can be achieved using only hundreds of strokes.
   - ⬜ MS Paint 
 
     <img src="./assets/brushes_mspaint.png" height=250>
+
+⬜ Real-world simulation (with **robotic arm**)
 
 ## 🔎 Reference
 
