@@ -5,9 +5,6 @@ import pandas as pd
 import numpy as np
 import cv2
 
-from modeling.paint_ddpg_sbr.brushstrokes import draw_curve
-from modeling.paint_ddpg_sbr.utilities import preprocess, postprocess
-
 
 WIDTH = 128
 
