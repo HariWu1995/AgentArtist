@@ -9,19 +9,25 @@ import numpy as np
 import torch
 
 
-def small2large(x: np.ndarray, width: int, division: int):
-    # (d * d, width, width) -> (d * width, d * width)    
+def reconstruct(x: np.ndarray, width: int, division: int):
+    """
+    Reconstruct patches into original image
+        patches (d * d, w, w) -> image (d * w, d * w)
+    """
     x = x.reshape(division, division, width, width, -1)
     x = np.transpose(x, (0, 2, 1, 3, 4))
     x = x.reshape(division * width, division * width, -1)
     return x
 
 
-def large2small(x: np.ndarray, num_canvas: int, width: int, division: int):
-    # (d * width, d * width) -> (d * d, width, width)
+def patchify(x: np.ndarray, width: int, division: int):
+    """
+    Split original image into patches
+        image (d * w, d * w) -> patches (d * d, w, w)
+    """
     x = x.reshape(division, width, division, width, 3)
     x = np.transpose(x, (0, 2, 1, 3, 4))
-    x = x.reshape(num_canvas, width, width, 3)
+    x = x.reshape(division * division, width, width, 3)
     return x
 
 
@@ -54,20 +60,19 @@ def smoothing(img: np.ndarray, width: int, division: int):
     return img
 
 
-def preprocess(image: np.ndarray, num_canvas: int, width: int, division: int, 
+def preprocess(image: np.ndarray, width: int, division: int, 
                 hires: bool = False, device = None):
     if hires:
-        return preprocess_hires(image, num_canvas, width, division, device)
+        return preprocess_hires(image, width, division, device)
     else:
-        return preprocess_lowres(image, num_canvas, width, division, device)
+        return preprocess_lowres(image, width, division, device)
 
     
-def preprocess_hires(image: np.ndarray, num_canvas: int, width: int, division: int, device = None):
+def preprocess_hires(image: np.ndarray, width: int, division: int, device = None):
 
     # divide target to patches (if division > 1)
-    patch_size = tuple([width * division] * 2)
-    patch_img = cv2.resize(image, patch_size)
-    patch_img = large2small(patch_img, num_canvas, width, division)
+    patch_img = cv2.resize(image, (width * division, width * division))
+    patch_img = patchify(patch_img, width, division)
     patch_img = np.transpose(patch_img, (0, 3, 1, 2))
     patch_img = torch.tensor(patch_img).float()
 
@@ -77,12 +82,11 @@ def preprocess_hires(image: np.ndarray, num_canvas: int, width: int, division: i
     return patch_img
 
     
-def preprocess_lowres(image: np.ndarray, num_canvas: int, width: int, division: int, device = None):
+def preprocess_lowres(image: np.ndarray, width: int, division: int, device = None):
 
     # divide target to patches (if division > 1)
-    patch_size = tuple([width * division] * 2)
-    patch_img = cv2.resize(image, patch_size)
-    patch_img = large2small(patch_img, num_canvas, width, division)
+    patch_img = cv2.resize(image, (width * division, width * division))
+    patch_img = patchify(patch_img, width, division)
     patch_img = np.transpose(patch_img, (0, 3, 1, 2))
     patch_img = torch.tensor(patch_img).float() / 255.
 
@@ -99,13 +103,12 @@ def preprocess_lowres(image: np.ndarray, num_canvas: int, width: int, division: 
     return patch_img, sized_img
 
 
-def postprocess(output, width: int = -1, division: int = -1, out_size = None, is_divided: bool = False):
+def postprocess(output, width: int = -1, division: int = -1, out_size = None):
     output = output.detach().cpu().numpy() # d * d, 3, width, width    
     output = np.transpose(output, (0, 2, 3, 1))
-    if is_divided:
-        assert (width > 0) and (division > 0), \
-            f"(width = {width}) & (division = {division}) must be positive integers."
-        output = small2large(output, width, division)
+    if division > 1:
+        assert width > 0, f"(width = {width}) must be positive integers."
+        output = reconstruct(output, width, division)
         output = smoothing(output, width, division)
     else:
         output = output[0]

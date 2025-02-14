@@ -22,7 +22,7 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 DTYPE = torch.float32
 
 WIDTH = 128
-SEQ_LEN = 5
+ACTION_BUNDLE = 5
 
 
 #################################
@@ -64,13 +64,11 @@ def render(actions, width, canvas, renderer = None):
     else:
         # Algorithmic rendering
         stroke_params = stroke_params.detach().cpu().numpy().tolist()
-
         stroke_new = []
         for param in stroke_params:
             stroke_draw = draw_curve(param, width)
             stroke_draw = torch.tensor(stroke_draw)
             stroke_new.append(stroke_draw)
-
         stroke_new = torch.stack(stroke_new, dim=0).to(device=DEVICE)
 
     stroke = 1 - stroke_new
@@ -78,14 +76,11 @@ def render(actions, width, canvas, renderer = None):
 
     colorgb = stroke * actions[:, -3:].view(-1, 1, 1, 3)
 
-    stroke = stroke.permute(0, 3, 1, 2)
-    colorgb = colorgb.permute(0, 3, 1, 2)
-
-    stroke = stroke.view(-1, SEQ_LEN, 1, width, width)
-    colorgb = colorgb.view(-1, SEQ_LEN, 3, width, width)
+    stroke  =  stroke.permute(0, 3, 1, 2).view(-1, ACTION_BUNDLE, 1, width, width)
+    colorgb = colorgb.permute(0, 3, 1, 2).view(-1, ACTION_BUNDLE, 3, width, width)
 
     re5ult = []
-    for i in range(SEQ_LEN):
+    for i in range(ACTION_BUNDLE):
         canvas = canvas * (1 - stroke[:, i]) + colorgb[:, i]
         re5ult.append(canvas)
     
@@ -111,9 +106,9 @@ def run_pipeline(
         painter, 
         renderer,
         image: np.ndarray,
-        width: int = 128, 
+        width: int = WIDTH, 
         division: int = 4,
-        lowres_step: int = 50,
+       lowres_step: int = 50,
         hires_step: int = 10,
         verbose: bool = False,
         out_dir: str = './results',
@@ -123,75 +118,111 @@ def run_pipeline(
         os.makedirs(out_dir)
 
     H, W = image.shape[:2]
-    T, C = init_aux(width)
+    T, C = init_aux(WIDTH)
     
-    num_canvas = division * division
     img_count = 0
-    img_stack = []
-    guidance = []  # to reproduce w/o running model
+    img_stack = []      # to generate animation
+    guidelowres = []    # to reproduce w/o running model
+    guidehires = []
 
     # if division > 1:
     #     max_step = max_step // 2
 
-    # Low-res
+    #########################
+    #       Low-res         #
+    #########################
+
     canvas = torch.zeros([1, 3, width, width]).to(device=DEVICE)
     patch_img, \
-    sized_img = preprocess(image, num_canvas, width, division, hires=False, device=DEVICE)
+    sized_img = preprocess(image, width, division, device=DEVICE, hires=False)
     
     print("\n Low-res painting ...")
     lowres_bar = tqdm(range(lowres_step))
     for i in lowres_bar:
-        step = T * i / lowres_step
+
+        # Inference
+        step = T * i / lowres_step  # step encoding -> dense vector
         inputs = torch.cat([canvas, sized_img, step, C], dim=1)
         actions = painter(inputs).view(-1, 10 + 3)
         canvas, re5ult = render(actions, width, canvas, renderer)
+        guidelowres.append(actions)
 
-        guidance.append(actions)
-        
+        # Evaluation
         loss = ((canvas - sized_img) ** 2).mean()
         log = f'step {i}, L2Loss = {loss:.5f}'
         lowres_bar.set_description(log)
         
+        # Postprocessing
         for res in re5ult:
-            res = postprocess(res, out_size=(H, W), is_divided=False)
+            res = postprocess(res, out_size=(H, W))
             cv2.imwrite(f'{out_dir}/out_{img_count:03d}.png', res)
             img_stack.append(res)
             img_count += 1
 
-    if division <= 1:
-        return img_stack
+    # Guidance
+    guidelowres = torch.cat(guidelowres, dim=0).detach().cpu()
+    guidescale = torch.ones(guidelowres.shape[0], 1)
+    guidepatch = -torch.ones(guidelowres.shape[0], 1)
+    guidelowres = torch.cat([guidescale, guidepatch, guidelowres], dim=1)
 
-    # Hires
+    if verbose:
+        print('\nGuidelines:')
+        print(guidelowres)
+        print(guidelowres.shape)
+
+    if division <= 1:
+        return img_stack, guidelowres
+
+    #########################
+    #        Hi-res         #
+    #########################
+
     canvas = canvas[0].detach().cpu().numpy()
     canvas = np.transpose(canvas, (1, 2, 0))    
-    canvas = preprocess(canvas, num_canvas, width, division, hires=True, device=DEVICE)
+    canvas = preprocess(canvas, width, division, hires=True, device=DEVICE)
 
-    C = C.expand(num_canvas, 2, width, width)
-    T = T.expand(num_canvas, 1, width, width)
+    num_patches = division * division
+    C = C.expand(num_patches, 2, width, width)
+    T = T.expand(num_patches, 1, width, width)
 
     print("\n Hi-res painting ...")
     hires_bar = tqdm(range(hires_step))
     for i in hires_bar:
+
+        # Inference
         step = T * i / hires_step
         inputs = torch.cat([canvas, patch_img, step, C], dim=1)
         actions = painter(inputs).view(-1, 10 + 3)
         canvas, re5ult = render(actions, width, canvas, renderer)
+        guidehires.append(actions)
 
-        guidance.append(actions)
-
+        # Evaluation
         loss = ((canvas - patch_img) ** 2).mean()
         log = f'step {i}, L2Loss = {loss:.5f}'
         hires_bar.set_description(log)
 
+        # Postprocessing
         for res in re5ult:
-            res = postprocess(res, width, division, out_size=(H, W), is_divided=True)
+            res = postprocess(res, width, division, out_size=(H, W))
             cv2.imwrite(f'{out_dir}/out_{img_count:03d}.png', res)
             img_stack.append(res)
             img_count += 1
 
-    guidance = torch.cat(guidance, dim=0).detach().cpu().numpy().tolist()
+    # Guidance
+    guidehires = torch.cat(guidehires, dim=0).detach().cpu()
+    guidescale = torch.ones(guidehires.shape[0], 1) * division
+    guidepatch = torch.arange(num_patches).repeat(ACTION_BUNDLE).view(ACTION_BUNDLE, -1)\
+                                .T.flatten().repeat(hires_step).view(-1, 1)
+    guidehires = torch.cat([guidescale, guidepatch, guidehires], dim=1)
 
-    return img_stack, guidance
+    if verbose:
+        print('\nGuidelines:')
+        print(guidehires)
+        print(guidehires.shape)
+
+    guidelines = torch.cat([guidelowres, guidehires], dim=0).numpy().tolist()
+
+    return img_stack, guidelines
 
 
 if __name__ == "__main__":
@@ -213,19 +244,27 @@ if __name__ == "__main__":
     division = int(image_size / WIDTH)
     out_dir = f'./results/nancy_{image_size}'
     with torch.no_grad():
-        images_list, guidance = run_pipeline(painter, renderer, image,
-                                                width = WIDTH, division = division,
-                                                verbose = True, out_dir = out_dir, 
-                                            hires_step = 20, lowres_step = 50)
+        images_list, \
+        guidelines = run_pipeline(painter, renderer, image,
+                                    width = WIDTH, division = division,
+                                    verbose = True, out_dir = out_dir, 
+                                hires_step = 20, lowres_step = 50)
 
     # Save guidance
-    print('\nSaving guidance ...')
-    with open(f'{out_dir}/guidance.txt', 'w') as fwriter:
-        fwriter.write('step,x0,y0,x1,y1,x2,y2,z0,z2,w0,w2,r,g,b')
-        for i, param in enumerate(guidance):
-            fwriter.write('\n' + ','.join([str(p) for p in [i+1]+param]))
+    #   num_lines = num_actions * (lowres_step + hires_step * (resolution / width)**2)
+    #             =       5     * (     50     +      20    * (   1024    /   128)**2) = 6650
+    print('\nSaving guidelines ...')
+    with open(f'{out_dir}/guidelines.csv', 'w') as fwriter:
+        fwriter.write('step,division,patch,x0,y0,x1,y1,x2,y2,z0,z2,w0,w2,r,g,b')
+        for i, param in enumerate(guidelines):
+            param = [str(i+1)] + [str(int(p)) for p in param[:2]] \
+                               + ['%.5f' % p for p in param[2:]] 
+            fwriter.write('\n' + ','.join(param))
 
     # Animation
+    #   num_frames = num_actions * (lowres_step + hires_step)
+    #              =    5        * (      50    +     20    ) = 350
     print('\nMaking GIF ...')
-    make_gif(images_list, out_path=f'{out_dir}/out.gif')
+    make_gif(images_list[::2] + \
+            [images_list[-1]]*5, out_path=f'{out_dir}/out.gif')
 
