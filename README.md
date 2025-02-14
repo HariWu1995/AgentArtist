@@ -47,9 +47,9 @@
 
 ## 🔢 Model Weights
 
-🖼️ Resolution of model output is **512** x **512**. 
+🖼️ Resolution of model output is **128** (Paint-DDPG) and **512** (Paint-Transformer). 
 
-📱 For hires image, input will be splitted into **patch**es and processed in parallel. But, the computation will be longer.
+📱 For hires image, input will be splitted into **patch**es and processed in parallel. But, it will cost more computation and storage.
 
 ### Paint Learner with DDPG + SBR
 
