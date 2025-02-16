@@ -1,61 +1,71 @@
-from typing import List, Tuple, Union
+import os
 from tqdm import tqdm
 
-import pandas as pd
+import math
+import torch
 import numpy as np
-import cv2
+import pandas as pd
+
+from modeling.paint_transformer.rendering import render_sequential as rendering
+from modeling.paint_transformer.utilities import read_img, save_img, pad, crop
+from modeling.paint_transformer.brushstrokes import load_brushes
 
 
-WIDTH = 128
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+DTYPE = torch.float32
+
+PATCH_SIZE = 32
+STROKE_NUM = 8      # number of strokes per patch per layer
+STROKE_PARAM = 5
 
 
 def reproduce(guidelines: pd.DataFrame):
     """
     Arguments:
-        guidelines: List of params (step,division,patch,x0,y0,x1,y1,x2,y2,z0,z2,w0,w2,r,g,b)
-                        where   (step, division, patch) are metadata
-                                (x0,y0,x1,y1,x2,y2,z0,z2,w0,w2) are input of drawing function
-                                (r,g,b) are color channels
+        guidelines: List of params (step,decision,layer,size,patch,x0,y0,w,h,theta,r,g,b)
+                        where   (step, decision, layer, size, patch) are metadata
+                                (x0, y0, w, h, theta) are shape parameters
+                                          and (r,g,b) are color channels, 
+                                          which are inputs for drawing function
     """
-    scale = guidelines.division.max()
-    full_canvas = np.zeros([WIDTH * scale, WIDTH * scale, 3]).astype('float32')
-    
-    for step, params in tqdm(guidelines.iterrows(), total=len(guidelines)):
-        params = params.values.tolist()
+    brushes = load_brushes('brush_large').float().to(device=DEVICE)
+    max_size = int(guidelines['size'].max())
 
-        division, patch = [int(p) for p in params[:2]]
-        width = int(WIDTH * (scale / division))
+    out_dir = './results/reproduction'
+    if not os.path.isdir(out_dir):
+        os.makedirs(out_dir)
 
-        stroke_params = params[2:-3]
-        colorgb = np.array(params[-3:]).reshape(1, 1, 3)
+    new_canvas = torch.zeros([1, 3, max_size, max_size]).float().to(device=DEVICE)
 
-        stroke = draw_curve(stroke_params, width)
-        stroke = stroke.reshape(width, width, 1)
+    layers = sorted([l for l in guidelines['layer'].unique().tolist() if l != -1])
+    for layer in tqdm(layers):
+        layer_params = guidelines[guidelines['layer'] == layer]
 
-        colorgb = (1 - stroke) * colorgb
+        patch_num = 2 ** layer
 
-        if patch == -1:
-            full_canvas = full_canvas * stroke + colorgb
-        else:
-            start_y = (patch // 8) * WIDTH
-            start_x = (patch % 8) * WIDTH
-            patch_canvas = full_canvas[start_y : start_y + WIDTH, 
-                                       start_x : start_x + WIDTH, :]
-            patch_canvas = patch_canvas * stroke + colorgb
-            full_canvas[start_y : start_y + WIDTH, 
-                        start_x : start_x + WIDTH, :] = patch_canvas
+        stroke_decision = layer_params['decision'].values
+        stroke_params = layer_params[['x0','y0','w','h','theta','r','g','b']].values
 
-    full_canvas = (full_canvas * 255).astype(int)
-    return full_canvas
+        decision = torch.from_numpy(stroke_decision).to(device=DEVICE)
+        stparams = torch.from_numpy(stroke_params).to(device=DEVICE)
+        
+        decision = decision.view(1, patch_num, patch_num, STROKE_NUM   ).contiguous().bool()
+        stparams = stparams.view(1, patch_num, patch_num, STROKE_NUM, 8).contiguous().float()
+
+        # Rendering
+        _ = rendering(stparams, decision, brushes, new_canvas, 
+                        out_dir, False, max_size, max_size, layer, save_mode='partial')
+
+    return new_canvas
 
 
 if __name__ == "__main__":
 
-    gen_dir = f'./results/nancy_1024'
+    gen_dir = f'./results/van_gogh_1024'
 
     guidelines = pd.read_csv(f'{gen_dir}/guidelines.csv').set_index('step')
     print(guidelines)
 
     canvas = reproduce(guidelines)
-    cv2.imwrite(f'{gen_dir}_reproduced.png', canvas)
+    # save_img(canvas[0], f'{gen_dir}_reproduced.png')
 

@@ -47,11 +47,11 @@
 
 ## 🔢 Model Weights
 
-🖼️ Resolution of model output is **128** (Paint-DDPG) and **512** (Paint-Transformer). 
-
-📱 For hires image, input will be splitted into **patch**es and processed in parallel. But, it will cost more computation and storage.
-
 ### Paint Learner with DDPG + SBR
+
+🖼️ Resolution of model output is **128** x **128**. 
+
+📱 For hires image, input will be divided into **patch**es and refined in parallel. But, it will cost more computation and storage.
 
 - **default** stroke: [renderer.pkl](https://drive.google.com/open?id=1-7dVdjCIZIxh8hHJnGTK-RA1-jL1tor4) and [actor.pkl](https://drive.google.com/open?id=1a3vpKgjCVXHON4P7wodqhCgCMPgg1KeR)
 
@@ -62,6 +62,10 @@
 - **curve** stroke: [renderer.pkl](https://drive.google.com/open?id=1XUdti00mPRh1-1iU66Uqg4qyMKk4OL19) and [actor.pkl](https://drive.google.com/open?id=1VBtesw2rHmYu2AeJ22XvTCuzuqkY8hZh)
 
 ### Paint Transformer
+
+🖼️ Resolution of model output is **32** x **32**. 
+
+🔀 For hires image (size of $2^N$), input will be divided into **patch**es at each k = 0 .. $log{_2}{(N/32)}+1$, then, all patches at each k are processed in parallel.
 
 - Checkpoint: [Paddle](https://drive.google.com/file/d/1G0O81qSvGp0kFCgyaQHmPygbVHFi1--q/view?usp=sharing) / [PyTorch](https://drive.google.com/file/d/1NDD54BLligyr8tzo8QGI5eihZisXK1nq/view?usp=sharing)
 

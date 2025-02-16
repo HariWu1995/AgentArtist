@@ -48,8 +48,9 @@ def drawing(param, H, W, brushes):
     R, G, B = param_list[5:]
 
     # Pre-compute sin theta and cos theta
-    sin_theta = torch.sin(torch.acos(torch.tensor(-1., device=device)) * theta)
-    cos_theta = torch.cos(torch.acos(torch.tensor(-1., device=device)) * theta)
+    rad_theta = torch.acos(torch.tensor(-1., device=device)) * theta
+    sin_theta = torch.sin(rad_theta)
+    cos_theta = torch.cos(rad_theta)
 
     # index indicates each stroke should be in which direction (vertical or horizontal).
     # When h > w, vertical stroke should be used. 
@@ -57,7 +58,7 @@ def drawing(param, H, W, brushes):
     index = torch.full((b,), -1, device=device, dtype=torch.long)
     index[h > w] = 0
     index[h <= w] = 1
-    brush = brushes[index.long()]
+    brush = brushes[index.long()].float()
 
     # Calculate warp matrix according to the rules defined by pytorch, in order for warping.
     warp_00 = cos_theta / w
@@ -74,7 +75,7 @@ def drawing(param, H, W, brushes):
 
     # Conduct warping.
     grid = F.affine_grid(warp, [b, 3, H, W], align_corners=False)
-    brush = F.grid_sample(brush, grid, align_corners=False)
+    brush = F.grid_sample(brush, grid.float(), align_corners=False)
 
     # alphas is the binary information suggesting whether a pixel is belonging to the stroke.
     alphas = (brush > 0).float()

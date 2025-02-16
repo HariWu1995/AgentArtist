@@ -6,7 +6,8 @@ import torch
 import torch.nn.functional as F
 
 
-def read_img(img_path, img_type: str = 'RGB', h: int = None, w: int = None):
+def read_img(img_path, img_type: str = 'RGB', h: int = None, w: int = None, 
+                    return_type: str = 'torch'):
     if not isinstance(img_path, Image.Image):
         img = Image.open(img_path).convert(img_type)
     else:
@@ -17,8 +18,10 @@ def read_img(img_path, img_type: str = 'RGB', h: int = None, w: int = None):
     img = np.array(img)
     if img.ndim == 2:
         img = np.expand_dims(img, axis=-1)
-    img = img.transpose((2, 0, 1))
-    img = torch.from_numpy(img).unsqueeze(0).float() / 255.
+    img = img.astype(np.float32) / 255.
+    if return_type == 'torch':
+        img = img.transpose((2, 0, 1))
+        img = torch.from_numpy(img).unsqueeze(0)
     return img
 
 

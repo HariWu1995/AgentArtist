@@ -5,7 +5,7 @@ import torch.nn.functional as F
 
 class Erosion2d(nn.Module):
 
-    def __init__(self, m=1):
+    def __init__(self, m: int = 1):
         super(Erosion2d, self).__init__()
         self.m = m
         self.pad = [m, m, m, m]
@@ -19,7 +19,7 @@ class Erosion2d(nn.Module):
         return result
 
 
-def erosion(x, m=1):
+def erosion(x, m: int = 1):
     b, c, h, w = x.shape
     x_pad = F.pad(x, pad=[m, m, m, m], mode='constant', value=1e9)
     channel = nn.functional.unfold(x_pad, 2 * m + 1, padding=0, stride=1).view(b, c, -1, h, w)
@@ -29,7 +29,7 @@ def erosion(x, m=1):
 
 class Dilation2d(nn.Module):
 
-    def __init__(self, m=1):
+    def __init__(self, m: int = 1):
         super(Dilation2d, self).__init__()
         self.m = m
         self.pad = [m, m, m, m]
@@ -43,7 +43,7 @@ class Dilation2d(nn.Module):
         return result
 
 
-def dilation(x, m=1):
+def dilation(x, m: int = 1):
     b, c, h, w = x.shape
     x_pad = F.pad(x, pad=[m, m, m, m], mode='constant', value=-1e9)
     channel = nn.functional.unfold(x_pad, 2 * m + 1, padding=0, stride=1).view(b, c, -1, h, w)

@@ -11,7 +11,7 @@ def render_sequential(
         param, decision, brushes, cur_canvas, 
         frame_dir: str = None, has_border: bool = False, 
         original_h: int = None, original_w: int = None, 
-        layer_id: int = 0,
+        layer_id: int = 0, save_mode: str = 'intermediate',
     ):
     """
     Input stroke parameters and decisions for each patch, brushes, current canvas, frame directory,
@@ -67,8 +67,8 @@ def render_sequential(
     odd_y_even_x_coord_y, odd_y_even_x_coord_x = torch.meshgrid([odd_idx_y, even_idx_x])
     odd_y_odd_x_coord_y, odd_y_odd_x_coord_x = torch.meshgrid([odd_idx_y, odd_idx_x])
 
-    cur_canvas = F.pad(cur_canvas, [patch_size_x // 4, patch_size_x // 4,
-                                    patch_size_y // 4, patch_size_y // 4, 0, 0, 0, 0])
+    cur_canvas = F.pad(cur_canvas, [patch_size_x // 4] * 2 + \
+                                   [patch_size_y // 4] * 2 + [0] * 4)
 
     def partial_render(this_canvas, patch_coord_y, patch_coord_x, stroke_id):
         canvas_patch = F.unfold(this_canvas, (patch_size_y, patch_size_x),
