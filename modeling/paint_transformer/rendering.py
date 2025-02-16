@@ -11,7 +11,7 @@ def render_sequential(
         param, decision, brushes, cur_canvas, 
         frame_dir: str = None, has_border: bool = False, 
         original_h: int = None, original_w: int = None, 
-        layer_id: int = 0, save_mode: str = 'intermediate',
+        layer_id: int = 0, save_mode: str = 'combined',
     ):
     """
     Input stroke parameters and decisions for each patch, brushes, current canvas, frame directory,
@@ -118,14 +118,18 @@ def render_sequential(
     and (even_idx_x.shape[0] > 0):
         for i in range(s):
             canvas = partial_render(cur_canvas, even_y_even_x_coord_y, even_y_even_x_coord_x, i)
+
             if not is_odd_y:
                 canvas = torch.cat([canvas, cur_canvas[:, :, -patch_size_y // 2:, :canvas.shape[3]]], dim=2)
             if not is_odd_x:
                 canvas = torch.cat([canvas, cur_canvas[:, :, :canvas.shape[2], -patch_size_x // 2:]], dim=3)
-            cur_canvas = canvas
 
             img_id += 1
-            save_intermediate(cur_canvas, img_id)
+            if save_mode == 'partial':
+                save_intermediate(canvas, img_id)
+            else:
+                cur_canvas = canvas
+                save_intermediate(cur_canvas, img_id)
 
     if (odd_idx_y.shape[0] > 0) \
     and (odd_idx_x.shape[0] > 0):
@@ -133,42 +137,54 @@ def render_sequential(
             canvas = partial_render(cur_canvas, odd_y_odd_x_coord_y, odd_y_odd_x_coord_x, i)
             canvas = torch.cat([cur_canvas[:, :, :patch_size_y // 2, -canvas.shape[3]:], canvas], dim=2)
             canvas = torch.cat([cur_canvas[:, :, -canvas.shape[2]:, :patch_size_x // 2], canvas], dim=3)
+
             if is_odd_y:
                 canvas = torch.cat([canvas, cur_canvas[:, :, -patch_size_y // 2:, :canvas.shape[3]]], dim=2)
             if is_odd_x:
                 canvas = torch.cat([canvas, cur_canvas[:, :, :canvas.shape[2], -patch_size_x // 2:]], dim=3)
-            cur_canvas = canvas
 
             img_id += 1
-            save_intermediate(cur_canvas, img_id)
+            if save_mode == 'partial':
+                save_intermediate(canvas, img_id)
+            else:
+                cur_canvas = canvas
+                save_intermediate(cur_canvas, img_id)
 
     if (even_idx_x.shape[0] > 0) \
     and (odd_idx_y.shape[0] > 0):
         for i in range(s):
             canvas = partial_render(cur_canvas, odd_y_even_x_coord_y, odd_y_even_x_coord_x, i)
             canvas = torch.cat([cur_canvas[:, :, :patch_size_y // 2, :canvas.shape[3]], canvas], dim=2)
+
             if is_odd_y:
                 canvas = torch.cat([canvas, cur_canvas[:, :, -patch_size_y // 2:, :canvas.shape[3]]], dim=2)
             if not is_odd_x:
                 canvas = torch.cat([canvas, cur_canvas[:, :, :canvas.shape[2], -patch_size_x // 2:]], dim=3)
-            cur_canvas = canvas
 
             img_id += 1
-            save_intermediate(cur_canvas, img_id)
+            if save_mode == 'partial':
+                save_intermediate(canvas, img_id)
+            else:
+                cur_canvas = canvas
+                save_intermediate(cur_canvas, img_id)
 
     if (even_idx_y.shape[0] > 0) \
     and (odd_idx_x.shape[0] > 0):
         for i in range(s):
             canvas = partial_render(cur_canvas, even_y_odd_x_coord_y, even_y_odd_x_coord_x, i)
             canvas = torch.cat([cur_canvas[:, :, :canvas.shape[2], :patch_size_x // 2], canvas], dim=3)
+
             if not is_odd_y:
                 canvas = torch.cat([canvas, cur_canvas[:, :, -patch_size_y // 2:, -canvas.shape[3]:]], dim=2)
             if is_odd_x:
                 canvas = torch.cat([canvas, cur_canvas[:, :, :canvas.shape[2], -patch_size_x // 2:]], dim=3)
-            cur_canvas = canvas
 
             img_id += 1
-            save_intermediate(cur_canvas, img_id)
+            if save_mode == 'partial':
+                save_intermediate(canvas, img_id)
+            else:
+                cur_canvas = canvas
+                save_intermediate(cur_canvas, img_id)
 
     cur_canvas = cur_canvas[:, :, patch_size_y // 4:-patch_size_y // 4, 
                                   patch_size_x // 4:-patch_size_x // 4]
