@@ -120,6 +120,8 @@
 
   4. CSGO: **Content-Style Composition** in Text-to-Image Generation ([Paper](https://arxiv.org/abs/2408.16766) | [Code](https://github.com/instantX-research/CSGO) | [Demo](https://huggingface.co/spaces/xingpng/CSGO))
 
+  5. Rethinking Style Transfer: From Pixels to **Parameterized Brushstrokes** ([Paper](https://arxiv.org/abs/2103.17185) | [Code](https://github.com/CompVis/brushstroke-parameterized-style-transfer))
+
 </details>
   
 ## 🧹 Brushes
