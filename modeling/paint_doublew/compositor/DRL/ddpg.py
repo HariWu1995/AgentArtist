@@ -1,80 +1,105 @@
 import os.path
-import random
+
 from PIL import Image
+import random
 import numpy as np
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.optim import Adam, SGD
+from torchvision import transforms
+from torchvision.utils import save_image
+
 from DRL.rpm import rpm
 from DRL.actor import *
 from DRL.critic import *
 from DRL.wgan import *
-from utils.util import *
 from DRL.loss import *
+
 from Renderer.network import *
-from torchvision import transforms
-from torchvision.utils import save_image
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-width=128
+from utils.util import *
+
+
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+WIDTH = 128
+
 coord = torch.zeros([1, 2, 128, 128])
 for i in range(128):
     for j in range(128):
         coord[0, 0, i, j] = i / 127.
         coord[0, 1, i, j] = j / 127.
-coord = coord.to(device)
+coord = coord.to(DEVICE)
 
 criterion = nn.MSELoss()
-param_num=5
-Decoder = FCN(param_num,True,False)
+param_num = 5
+
+Decoder = FCN(param_num, True, False)
 Decoder.load_state_dict(torch.load('../oil_brush.pkl'))
-resize_width=transforms.Resize((width,width))
-resize_128=transforms.Resize((128,128))
-painter=ResNet(6, 18, 5*(param_num+3))
+
+resize_width = transforms.Resize((WIDTH, WIDTH))
+resize_128   = transforms.Resize((128, 128))
+
+painter = ResNet(6, 18, 5*(param_num+3))
 painter.load_state_dict(torch.load('../painter/checkpoints/Painter.pth'))
 painter.eval()
-def decode(box, canvas, tar_canvas,debug=False,step=0):  # b * (10 + 3) 128size decode
+
+
+def decode(box, src_canvas, tgt_canvas, debug=False, step=0):  
+    # size decode: b * (10 + 3) 128
     with torch.no_grad():
-        tar_canvas_box = []
-        canvas_box = []
-        for i in range(canvas.size(0)):
-            x1, y1, x2, y2 = torch.round(box[i]*(width-1)).detach().int()
+        tgt_canvas_box = []
+        src_canvas_box = []
+        for i in range(src_canvas.size(0)):
+            x1, y1, x2, y2 = torch.round(box[i]*(WIDTH-1)).detach().int()
             x1, x2 = min(x1, x2), max(x1, x2)
             y1, y2 = min(y1, y2), max(y1, y2)
-            tar_canvas_box.append(resize_width(tar_canvas[i, :, x1:x2 + 1, y1:y2 + 1]))
-            canvas_box.append(resize_width(canvas[i, :, x1:x2 + 1, y1:y2 + 1]))
-        tar_canvas_box = torch.stack(tar_canvas_box, dim=0)
-        canvas_box = torch.stack(canvas_box, dim=0)
+            tgt_canvas_box.append(resize_width(tgt_canvas[i, :, x1:x2 + 1, y1:y2 + 1]))
+            src_canvas_box.append(resize_width(src_canvas[i, :, x1:x2 + 1, y1:y2 + 1]))
+        
+        tgt_canvas_box = torch.stack(tgt_canvas_box, dim=0)
+        src_canvas_box = torch.stack(src_canvas_box, dim=0)
+        
         for kk in range(4):
-            param = painter(torch.cat((canvas_box, tar_canvas_box), dim=1))
+            param = painter(torch.cat((src_canvas_box, tgt_canvas_box), dim=1))
             x = param.view(-1, param_num + 3)
             foregrounds, alphas = Decoder(x[:, :param_num + 3])
-            foregrounds = foregrounds.view(-1, 5, 3, width, width)
-            alphas = alphas.view(-1, 5, 1, width, width)
+            foregrounds = foregrounds.view(-1, 5, 3, WIDTH, WIDTH)
+            alphas      =      alphas.view(-1, 5, 1, WIDTH, WIDTH)
             for i in range(5):
-                canvas_box = canvas_box * (1 - alphas[:, i]) + alphas[:, i] * foregrounds[:, i]
+                src_canvas_box = src_canvas_box * (1 - alphas[:, i]) + alphas[:, i] * foregrounds[:, i]
+        
         for i in range(canvas.size(0)):
-            x1, y1, x2, y2 = torch.round(box[i]*127).detach().int()
+            x1, y1, x2, y2 = torch.round(box[i] * 127).detach().int()
             x1, x2 = min(x1, x2), max(x1, x2)
             y1, y2 = min(y1, y2), max(y1, y2)
             resize = transforms.Resize((x2+1 - x1, y2+1 - y1))
-            canvas[i, :, x1:x2+1, y1:y2+1] = resize(canvas_box[i])
+            canvas[i, :, x1:x2+1, y1:y2+1] = resize(src_canvas_box[i])
         return canvas
+
+
 def cal_trans(s, t):
     return (s.transpose(0, 3) * t).transpose(0, 3)
 
+
 class DDPG(object):
-    def __init__(self, args,batch_size=64, env_batch=1, max_step=40, \
-                 tau=0.001, discount=0.9, rmsize=800, \
-                 writer=None, resume=None, output_path=None):
-        self.args=args
+
+    def __init__(
+            self, args, batch_size=64, env_batch=1, max_step=40, 
+            tau=0.001, discount=0.9, rmsize=800, 
+            writer=None, resume=None, output_path=None,
+        ):
+        self.args = args
         self.max_step = max_step
         self.env_batch = env_batch
         self.batch_size = batch_size
-        self.actor = ResNet(6, 18, 4) # canvas,target
+
+        self.actor = ResNet(6, 18, 4) # canvas, target
         self.actor_target = ResNet(6, 18, 4)
+        
         self.critic = ResNet_wobn(10, 18, 1) # add the last canvas for better prediction
         self.critic_target = ResNet_wobn(10, 18, 1)
+        
         self.actor_optim  = Adam(self.actor.parameters(), lr=1e-2)
         self.critic_optim  = Adam(self.critic.parameters(), lr=1e-2)
 
@@ -100,65 +125,73 @@ class DDPG(object):
         self.choose_device()
         self.size=1
 
-    def play(self, state, target=False,debug=False):
+    def play(self, state, target=False, debug=False):
         state = state[:, :6].float() / 255
         if target:
             return self.actor_target(state)
         else:
             if debug:
-                tmp=self.actor(state)
+                tmp = self.actor(state)
                 print(tmp[0])
             return self.actor(state)
 
     def update_gan(self, state):
         canvas = state[:, :3]
-        gt = state[:, 3 : 6]
-        fake, real, penal = update(canvas.float() / 255, gt.float() / 255)
+        gtruth = state[:, 3 : 6]
+        fake, real, penal = update(canvas.float() / 255, gtruth.float() / 255)
+
     def test(self):
         transform=transforms.Compose([
             transforms.ToTensor(),
-            transforms.Resize([128,128])
+            transforms.Resize([128, 128])
         ])
-        img=Image.open('/home/huteng/LearningToPaint-master/image/1.jpg')
-        img=transform(img).unsqueeze(0)
-        canvas=torch.zeros_like(img)
-        state=torch.cat((canvas,img),1).cuda()*255
-        # action=self.play(state)
-        # Q,R=self.evaluate(state,action)
-        # print('reward',Q,R)
-        action=torch.tensor([[0.0,0.0,1.0,1.0]]).cuda()
+        img = Image.open('/home/huteng/LearningToPaint-master/image/1.jpg')
+        img = transform(img).unsqueeze(0)
+        canvas = torch.zeros_like(img)
+        state = torch.cat((canvas, img), 1).cuda() * 255
+        # action = self.play(state)
+        # Q, R = self.evaluate(state, action)
+        # print('reward', Q, R)
+        action = torch.tensor([[0.0, 0.0, 1.0, 1.0]]).cuda()
         Q, R = self.evaluate(state, action)
-        print('reward',Q, R)
+        print('reward', Q, R)
+
     def evaluate(self, state, action, target=False):
-        gt = state[:, 3 : 6].float() / 255
+        gtruth = state[:, 3:6].float() / 255
         canvas0 = state[:, :3].float() / 255
-        action_repeat=action.unsqueeze(-1).unsqueeze(-1).repeat(1,1,128,128)
-        merged_state = torch.cat([resize_128(canvas0),resize_128(gt),action_repeat], 1)
+        action_repeat = action.unsqueeze(-1).unsqueeze(-1).repeat(1, 1, 128, 128)
+        merged_state = torch.cat([resize_128(canvas0), resize_128(gtruth), action_repeat], 1)
+
         # canvas0 is not necessarily added
         if target:
             Q = self.critic_target(merged_state)
-            return Q.squeeze(),None
+            return Q.squeeze(), None
         else:
-            canvas1 = decode(action, canvas0.clone(), gt)
-            dist0=((canvas0 - gt) ** 2).mean(1).mean(1).mean(1)
-            dist1=((canvas1 - gt) ** 2).mean(1).mean(1).mean(1)
-            gan_reward=dist0-dist1
-            alpha1=(dist0 > 0.005).int()
+            canvas1 = decode(action, canvas0.clone(), gtruth)
+            dist0 = ((canvas0 - gtruth) ** 2).mean(1).mean(1).mean(1)
+            dist1 = ((canvas1 - gtruth) ** 2).mean(1).mean(1).mean(1)
+            gan_reward = dist0 - dist1
+            
+            alpha1 = (dist0 > 0.005).int()
             alpha2 = (dist0 > 0.003).int()
             alpha3 = (dist0 > 0.001).int()
-            gan_reward=alpha1*gan_reward/4+(1-alpha1)*alpha2*gan_reward*125\
-                       +(1-alpha2)*alpha3*gan_reward*125+(1-alpha3)*gan_reward*250
+            gan_reward =       alpha1           * gan_reward / 4 \
+                        + (1 - alpha1) * alpha2 * gan_reward * 125 \
+                        + (1 - alpha2) * alpha3 * gan_reward * 125 \
+                        + (1 - alpha3)          * gan_reward * 250
             # gan_reward = dist0 - dist1
             # alpha = (dist0 > 0.005).int()
             # gan_reward = alpha * gan_reward + (1 - alpha) * self.f(1 - dist1) * gan_reward
             Q = self.critic(merged_state)
-            return Q.squeeze(),gan_reward
-    def f(self,x,alpha=0.1):
-        return alpha*torch.log((1+x)/(1-x))
+            return Q.squeeze(), gan_reward
+
+    def f(self, x, alpha=0.1):
+        return alpha * torch.log((1+x)/(1-x))
+
     def update_policy(self, lr):
         self.log += 1
-        if self.log%1000==0 and self.log!=0:
-            self.size*=0.95
+        if self.log % 1000 == 0 and self.log != 0:
+            self.size *= 0.95
         for param_group in self.critic_optim.param_groups:
             param_group['lr'] = lr[0]
         for param_group in self.actor_optim.param_groups:
@@ -166,28 +199,34 @@ class DDPG(object):
 
         # Sample batch
         state, action, reward, \
-            next_state, terminal = self.memory.sample_batch(self.batch_size, device)
+            next_state, terminal = self.memory.sample_batch(self.batch_size, DEVICE)
+
         # if not self.args.style:
         #     self.update_gan(next_state)
+
         with torch.no_grad():
             next_action = self.play(next_state, True)
             target_q, _ = self.evaluate(next_state, next_action, True)
             target_q = self.discount * ((1 - terminal.float())) * target_q
+
         cur_q, step_reward = self.evaluate(state, action)
         target_q += step_reward.detach()
-        #print(cur_q.shape,target_q.shape)
+        # print(cur_q.shape, target_q.shape)
+
         value_loss = criterion(cur_q, target_q)
         self.critic.zero_grad()
+
         value_loss.backward(retain_graph=True)
         self.critic_optim.step()
 
         action = self.play(state)
         pre_q, _ = self.evaluate(state.detach(), action)
         #_, pre_q = self.evaluate(state.detach(), action)
+
         policy_loss = -pre_q.mean()
         self.actor.zero_grad()
+
         policy_loss.backward(retain_graph=True)
-        #print(self.actor.conv1.weight.grad)
         self.actor_optim.step()
 
         # Target update
@@ -219,8 +258,8 @@ class DDPG(object):
             action = to_numpy(action)
         if noise_factor > 0:
             if random.random()<noise_factor:
-                action=np.random.rand(action.shape[0],action.shape[1])
-            #action = self.noise_action(noise_factor, state, action)
+                action = np.random.rand(action.shape[0], action.shape[1])
+            # action = self.noise_action(noise_factor, state, action)
         self.train()
         self.action = action
         if return_fix:
@@ -235,7 +274,7 @@ class DDPG(object):
         if path is None: return
         self.actor.load_state_dict(torch.load('{}/actor.pkl'.format(path)))
         self.critic.load_state_dict(torch.load('{}/critic.pkl'.format(path)))
-        #load_gan(path)
+        # load_gan(path)
 
     def save_model(self, path):
         self.actor.cpu()
@@ -258,9 +297,9 @@ class DDPG(object):
         self.critic_target.train()
 
     def choose_device(self):
-        painter.to(device).eval()
-        Decoder.to(device).eval()
-        self.actor.to(device)
-        self.actor_target.to(device)
-        self.critic.to(device)
-        self.critic_target.to(device)
+        painter.to(DEVICE).eval()
+        Decoder.to(DEVICE).eval()
+        self.actor.to(DEVICE)
+        self.actor_target.to(DEVICE)
+        self.critic.to(DEVICE)
+        self.critic_target.to(DEVICE)

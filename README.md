@@ -45,6 +45,22 @@
   <img src="./assets/PaintTransformer/3x2.gif" width=512>
 </details>
 
+### Compositional Neural Painter / Stroke-based Neural Painting and Stylization with Dynamically Predicted Painting Region
+
+<img src="./assets/CompositionalNeuralPainter/1.gif" width=256>
+
+<details>
+  <summary>More samples</summary>
+  <img src="./assets/CompositionalNeuralPainter/2.gif" width=256>
+  <img src="./assets/CompositionalNeuralPainter/3.gif" width=256>
+  <img src="./assets/CompositionalNeuralPainter/4.gif" width=256>
+  <img src="./assets/CompositionalNeuralPainter/5.gif" width=256>
+  <img src="./assets/CompositionalNeuralPainter/6.gif" width=256>
+  <img src="./assets/CompositionalNeuralPainter/7.gif" width=256>
+  <img src="./assets/CompositionalNeuralPainter/8.gif" width=256>
+  <img src="./assets/CompositionalNeuralPainter/9.gif" width=256>
+</details>
+
 ## 🔢 Model Weights
 
 ### Paint Learner with DDPG + SBR
@@ -73,6 +89,10 @@
   - **horizontal** <img src="./checkpoints/paint_transformer/brush/brush_large_horizontal.png" width=50>
   - **vertical** <img src="./checkpoints/paint_transformer/brush/brush_large_vertical.png" width=50>
   - **rendering** (diffentiable): <img src="./assets/PaintTransformer/metabrush.png" width=250>
+
+### Compositional Neural Painter with Double-W Strategy (Where-What)
+
+- **default** stroke: [compositor.pkl](https://drive.google.com/file/d/1FPtSM-x8xe1vDkw4CV8XF6rIxRq3LLIL), [painter.pkl](https://drive.google.com/file/d/1GnSBEJrvx2g3VjFO0qyK3DCd6pwIN_bb) and [renderer.pkl](https://drive.google.com/file/d/1meZL9ayCKZGYYrFbisOI4wNonuYnTtEV)
 
 ## 🦾 Features 🦿
 

@@ -26,6 +26,7 @@ def erosion(x, m=1):
     result = torch.min(channel, dim=2)[0]
     return result
 
+
 class Dilation2d(nn.Module):
 
     def __init__(self, m=1):

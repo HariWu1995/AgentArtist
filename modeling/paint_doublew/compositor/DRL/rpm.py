@@ -1,8 +1,9 @@
 # from collections import deque
+import pickle as pickle
 import numpy as np
 import random
 import torch
-import pickle as pickle
+
 
 class rpm(object):
     # replay memory

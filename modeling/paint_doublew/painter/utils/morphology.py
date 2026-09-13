@@ -19,7 +19,6 @@ class Erosion2d(nn.Module):
             channel = torch.min(channel, dim=1, keepdim=True)[0]
             channel = channel.view([batch_size, 1, h, w])
             x[:, [i], :, :] = channel
-
         return x
 
 
@@ -39,14 +38,17 @@ class Dilation2d(nn.Module):
             channel = torch.max(channel, dim=1, keepdim=True)[0]
             channel = channel.view([batch_size, 1, h, w])
             x[:, [i], :, :] = channel
-
         return x
+
+
 def erosion(x, m=1):
     b, c, h, w = x.shape
     x_pad = F.pad(x, pad=[m, m, m, m], mode='constant', value=1e9)
     channel = nn.functional.unfold(x_pad, 2 * m + 1, padding=0, stride=1).view(b, c, -1, h, w)
     result = torch.min(channel, dim=2)[0]
     return result
+
+
 def dilation(x, m=1):
     b, c, h, w = x.shape
     x_pad = F.pad(x, pad=[m, m, m, m], mode='constant', value=-1e9)

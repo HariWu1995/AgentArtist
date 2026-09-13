@@ -1,13 +1,14 @@
 import numpy as np
 from utils.util import *
 
+
 class Evaluator(object):
 
     def __init__(self, args, writer):
         try:
-            self.style=args.style
+            self.style = args.style
         except:
-            self.style=False
+            self.style = False
         self.validate_episodes = args.validate_episodes
         self.max_step = args.max_step
         self.env_batch = args.env_batch
@@ -18,10 +19,12 @@ class Evaluator(object):
         observation = None
         for episode in range(self.validate_episodes):
             # reset at the start of episode
-            observation = env.reset(test=True, episode=episode,style=self.style)
+            observation = env.reset(test=True, episode=episode, style=self.style)
+            assert observation is not None            
+
             episode_steps = 0
             episode_reward = 0.     
-            assert observation is not None            
+
             # start episode
             episode_reward = np.zeros(self.env_batch)
             while (episode_steps < self.max_step or not self.max_step):
@@ -29,13 +32,13 @@ class Evaluator(object):
                 observation, reward, done, (step_num) = env.step(action,style=self.style,debug=True)
                 episode_reward += reward
                 episode_steps += 1
-                if episode_steps%10==0:
+                if episode_steps %10 == 0:
                     env.save_img(self.log, episode_steps)
                 dist = env.get_dist()
-                #print(dist)
-                #print(dist.mean())
+                # print(dist)
+                # print(dist.mean())
             if self.style:
-                dist=env.gen_style()
+                dist = env.gen_style()
             else:
                 dist = env.get_dist()
             self.log += 1
