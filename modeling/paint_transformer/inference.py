@@ -48,6 +48,7 @@ def run_pipeline(
         image: Image.Image or str,
         verbose: bool = False,
         out_dir: str = './results',
+        canvas: str = 'black',
     ):
 
     if not os.path.isdir(out_dir):
@@ -67,7 +68,10 @@ def run_pipeline(
     original_img_pad_size = P * (2 ** K)
     original_img_pad = pad(original_img, original_img_pad_size, original_img_pad_size)
 
-    final_result = torch.zeros_like(original_img_pad).to(device=DEVICE)
+    if canvas.lower() == 'white':
+        final_result = torch.ones_like(original_img_pad).to(device=DEVICE)
+    else:
+        final_result = torch.zeros_like(original_img_pad).to(device=DEVICE)
 
     pbar = tqdm(range(0, K+1))
     for layer in pbar:
@@ -221,19 +225,22 @@ if __name__ == '__main__':
 
     # Load image
     # image_path = "C:/Users/Mr. RIAH/Pictures/_character/Nancy-Closeup.jpg"
-    image_path = "./samples/van-gogh-garden-at-arles.png"
-    image_size = 1024
+    # image_path = "./samples/van-gogh-garden-at-arles.png"
+    image_path = "F:/Document/Artwork/_ghostories_/styles/duong-di-ha-giang-1-picasso.jpg"
+    image_size = 2048
     image = Image.open(image_path).convert('RGB')
-    i_temp = Image.new(image.mode, (852, 852), (0, 0, 0)) 
-    i_temp.paste(image, (0, (852-552)//2))
+    i_temp = Image.new(image.mode, (2048, 2048), (255, 255, 255)) 
+    i_temp.paste(image, (0, (2048-1365)//2))
     image = i_temp
     image = image.resize((image_size, image_size))
 
     # Run pipeline
-    out_dir = f'./results/van_gogh_{image_size}'
+    # out_dir = f'./results/van_gogh_{image_size}'
+    out_dir = f'F:/Document/Artwork/_ghostories_/output/duong-di-ha-giang-1-picasso_{image_size}'
     with torch.no_grad():
         images_list, \
-        guidelines = run_pipeline(painter, brushes, image, verbose=True, out_dir=out_dir)
+        guidelines = run_pipeline(painter, brushes, image, 
+                                  verbose=True, out_dir=out_dir, canvas='white')
 
     # Save guidance
     print('\nSaving guidelines ...')
@@ -248,7 +255,12 @@ if __name__ == '__main__':
 
     # Animation
     print('\nMaking GIF ...')
-    make_gif(images_list[::2] + \
-            [images_list[-1]]*5, out_path=f'{out_dir}/out.gif')
+    frames_list = images_list[:20] + \
+                  images_list[20::10] + \
+                 [images_list[-1]]*5
+    make_gif(frames_list, out_path=f'{out_dir}/out.gif')
+
+    # Run CMD
+    # python -m modeling.paint_transformer.inference
 
 

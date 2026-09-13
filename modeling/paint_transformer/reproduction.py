@@ -61,6 +61,29 @@ def reproduce(guidelines: pd.DataFrame):
 
 if __name__ == "__main__":
 
+    gen_dir = f'F:/Document/Artwork/_ghostories_/output/duong-di-ha-giang-1-picasso_2048'
+    video_path = f'{gen_dir}/out.mp4'
+
+    import cv2
+    video_fps = 20
+    video_size = (2048, 2048)
+    video_format = cv2.VideoWriter_fourcc(*"mp4v")
+    video_writer = cv2.VideoWriter(video_path, video_format, video_fps, video_size)
+
+    from glob import glob
+    images_list = glob(f"{gen_dir}/_L[0-9][0-9][0-9]_S[0-9][0-9][0-9].jpg")
+    images_list = sorted(images_list)
+    for image_path in tqdm(images_list):
+        image = cv2.imread(image_path)
+        frame = cv2.resize(image, video_size, interpolation=cv2.INTER_AREA)
+        video_writer.write(frame)
+
+    video_writer.release()
+    quit()
+
+    # Run CMD
+    # python -m modeling.paint_transformer.reproduction
+
     gen_dir = f'./results/van_gogh_1024'
 
     guidelines = pd.read_csv(f'{gen_dir}/guidelines.csv').set_index('step')

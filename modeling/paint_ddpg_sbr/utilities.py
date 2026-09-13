@@ -128,5 +128,19 @@ def make_gif(all_frames, out_path: str, fps: int = 20, size: int = 512):
         seq_frames.append(f)
     init_frame = seq_frames[0]
     init_frame.save(out_path, format="GIF", append_images=seq_frames,
-                                loop=0, fps=fps, save_all=True)
+                                loop=0, save_all=True, duration=1000//fps) #,fps=fps
+
+
+def make_video(all_frames, out_path: str, fps: int = 5, size: int = 512):
+    
+    height, width = all_frames[0].shape[:2]
+
+    # Define the codec and create VideoWriter object
+    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+    video = cv2.VideoWriter(out_path, fourcc, fps, (width, height))
+
+    for f in all_frames:
+        f = cv2.resize(f, (size, size), interpolation=cv2.INTER_LINEAR)
+        video.write(f)
+    video.release()
 

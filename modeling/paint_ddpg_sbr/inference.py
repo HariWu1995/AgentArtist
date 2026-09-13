@@ -233,22 +233,24 @@ if __name__ == "__main__":
     painter, renderer = load_models(painter_ckpt_path)
 
     # Load image
-    image_path = "C:/Users/Mr. RIAH/Pictures/_character/Nancy-Closeup.jpg"
+    # image_path = "C:/Users/Mr. RIAH/Pictures/_character/Nancy-Closeup.jpg"
     # image_path = "./samples/van-gogh-garden-at-arles.png"
-    image_size = 1024
+    image_path = "F:/Document/Artwork/_ghostories_/styles/duong-di-ha-giang-1-flatillustration.jpg"
+    image_size = 2048
     image = cv2.imread(image_path, cv2.IMREAD_COLOR)
-    # image = cv2.copyMakeBorder(image, (852-552)//2, (852-552)//2, 0, 0, cv2.BORDER_CONSTANT)
+    image = cv2.copyMakeBorder(image, (2048-1365)//2, (2048-1365)//2, 0, 0, cv2.BORDER_CONSTANT)
     image = cv2.resize(image, (image_size, image_size))
 
     # Run pipeline
     division = int(image_size / WIDTH)
-    out_dir = f'./results/nancy_{image_size}'
+    out_dir = f'F:/Document/Artwork/_ghostories_/output/duong-di-ha-giang-1-flatillustration_{image_size}'
+    # out_dir = f'./results/nancy_{image_size}'
     with torch.no_grad():
         images_list, \
         guidelines = run_pipeline(painter, renderer, image,
                                     width = WIDTH, division = division,
                                     verbose = True, out_dir = out_dir, 
-                                hires_step = 20, lowres_step = 50)
+                                hires_step = 100, lowres_step = 100)
 
     # Save guidance
     #   num_lines = num_actions * (lowres_step + hires_step * (resolution / width)**2)
@@ -265,6 +267,11 @@ if __name__ == "__main__":
     #   num_frames = num_actions * (lowres_step + hires_step)
     #              =    5        * (      50    +     20    ) = 350
     print('\nMaking GIF ...')
-    make_gif(images_list[::2] + \
-            [images_list[-1]]*5, out_path=f'{out_dir}/out.gif')
+    frames_list = images_list[:20] + \
+                  images_list[20::10] + \
+                 [images_list[-1]]*5
+    make_gif(frames_list, out_path=f'{out_dir}/out.gif')
+
+    # Run CMD
+    # python -m modeling.paint_ddpg_sbr.inference
 
