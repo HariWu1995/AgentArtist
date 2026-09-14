@@ -112,6 +112,7 @@ def run_pipeline(
         hires_step: int = 10,
         verbose: bool = False,
         out_dir: str = './results',
+        background_color: str = 'black',
     ):
 
     if not os.path.isdir(out_dir):
@@ -133,6 +134,9 @@ def run_pipeline(
     #########################
 
     canvas = torch.zeros([1, 3, width, width]).to(device=DEVICE)
+    if background_color.lower() == 'white':
+        canvas += 1
+
     patch_img, \
     sized_img = preprocess(image, width, division, device=DEVICE, hires=False)
     
@@ -237,8 +241,9 @@ if __name__ == "__main__":
     # image_path = "./samples/van-gogh-garden-at-arles.png"
     image_path = "F:/Document/Artwork/_ghostories_/styles/duong-di-ha-giang-1-flatillustration.jpg"
     image_size = 2048
+    image_bg = (255, 255, 255) # (255, 255, 255) for white, (0, 0, 0) for black
     image = cv2.imread(image_path, cv2.IMREAD_COLOR)
-    image = cv2.copyMakeBorder(image, (2048-1365)//2, (2048-1365)//2, 0, 0, cv2.BORDER_CONSTANT)
+    image = cv2.copyMakeBorder(image, (2048-1365)//2, (2048-1365)//2, 0, 0, borderType=cv2.BORDER_CONSTANT, value=image_bg)
     image = cv2.resize(image, (image_size, image_size))
 
     # Run pipeline

@@ -227,7 +227,7 @@ if __name__ == '__main__':
     # image_path = "C:/Users/Mr. RIAH/Pictures/_character/Nancy-Closeup.jpg"
     # image_path = "./samples/van-gogh-garden-at-arles.png"
     image_path = "F:/Document/Artwork/_ghostories_/styles/duong-di-ha-giang-1-picasso.jpg"
-    image_size = 2048
+    image_size = 512
     image = Image.open(image_path).convert('RGB')
     i_temp = Image.new(image.mode, (2048, 2048), (255, 255, 255)) 
     i_temp.paste(image, (0, (2048-1365)//2))
@@ -236,7 +236,7 @@ if __name__ == '__main__':
 
     # Run pipeline
     # out_dir = f'./results/van_gogh_{image_size}'
-    out_dir = f'F:/Document/Artwork/_ghostories_/output/duong-di-ha-giang-1-picasso_{image_size}'
+    out_dir = f'F:/Document/Artwork/_ghostories_/output/duong-di-ha-giang-1-picasso_{image_size}_transformer'
     with torch.no_grad():
         images_list, \
         guidelines = run_pipeline(painter, brushes, image, 

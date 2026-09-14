@@ -241,7 +241,7 @@ class FCN(nn.Module):
         return color_stroke, alpha
 
     def draw(self, x):
-        b=x.size(0)
+        b = x.size(0)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         x = F.relu(self.fc3(x))

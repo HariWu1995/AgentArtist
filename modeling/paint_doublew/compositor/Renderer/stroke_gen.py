@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-import morphology
+from . import morphology
 
 
 def normal(x, width):
@@ -47,15 +47,16 @@ def read_img(img_path, img_type='RGB'):
     return img
 
 
-brush_large_vertical = read_img('brush/brush_large_vertical.png', 'L').cuda()
-brush_large_horizontal = read_img('brush/brush_large_horizontal.png', 'L').cuda()
-meta_brushes = torch.cat([brush_large_vertical, brush_large_horizontal], dim=0)
+# brush_large_vertical = read_img('brush/brush_large_vertical.png', 'L').cuda()
+# brush_large_horizontal = read_img('brush/brush_large_horizontal.png', 'L').cuda()
+# meta_brushes = torch.cat([brush_large_vertical, brush_large_horizontal], dim=0)
 
-brush_large_vertical_pad = read_img('brush/brush_large_vertical_pad.png', 'L').cuda()
-brush_large_horizontal_pad = read_img('brush/brush_large_horizontal_pad.png', 'L').cuda()
-meta_brushes_pad = torch.cat([brush_large_vertical_pad, brush_large_horizontal_pad], dim=0)
+# brush_large_vertical_pad = read_img('brush/brush_large_vertical_pad.png', 'L').cuda()
+# brush_large_horizontal_pad = read_img('brush/brush_large_horizontal_pad.png', 'L').cuda()
+# meta_brushes_pad = torch.cat([brush_large_vertical_pad, brush_large_horizontal_pad], dim=0)
 
-def draw_oil(param, size=128):
+
+def draw_oil(meta_brushes, param, size=128):
     # param: b, 12
     H = W = size
     b = param.shape[0]
@@ -97,7 +98,7 @@ def draw_oil(param, size=128):
     return torch.cat([1-brush, 1-alphas], dim=1)
 
 
-def draw_oil_tps(param, tps, size=128):
+def draw_oil_tps(meta_brushes_pad, param, tps, size=128):
     # param: b, 12
     def conv(x):
         x= F.conv2d(x, weight, padding=1)
@@ -159,9 +160,9 @@ def draw_oil_tps(param, tps, size=128):
     return torch.cat([1-brush, 1-alphas, 1-edge], dim=1)
 
 
-def draw_oil_edge(param, size=128):
+def draw_oil_edge(meta_brushes, param, size=128):
     def conv(x):
-        x= F.conv2d(x, weight, padding=1)
+        x = F.conv2d(x, weight, padding=1)
         return x
 
     kernel = [
