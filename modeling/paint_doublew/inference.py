@@ -253,7 +253,7 @@ def run_pipeline(
             video_writer.write(frame)
 
     if isinstance(canvas, torch.Tensor):
-        save_image(canvas[:, [2, 1, 0]], 'output.png', nrow=1, normalize=False)
+        save_image(canvas[:, [2, 1, 0]], f'{out_dir}/output.png', nrow=1, normalize=False)
 
     if video_clip:
         video_writer.release()
