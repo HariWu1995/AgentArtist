@@ -1,4 +1,7 @@
 import os
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
+
 from tqdm import tqdm
 from PIL import Image
 
@@ -29,6 +32,7 @@ from .utilities import (
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 DTYPE = torch.float32
+loss_fn = torch.nn.MSELoss()
 
 
 #################################
@@ -36,10 +40,10 @@ DTYPE = torch.float32
 #################################
 
 def load_models(
-    path_to_painter: str = None, 
-    path_to_compositor: str = None,
-    path_to_renderer: str = None,
-):
+        path_to_painter: str = None, 
+        path_to_compositor: str = None,
+        path_to_renderer: str = None,
+    ):
     # Load painter (actor) model -> ResNet 18
     #               action bundle = 5, 
     #               color channel = 3,
@@ -70,13 +74,13 @@ def load_models(
 
 
 def run_pipeline_by_size(
-    image,
-    num_strokes: int,
-    Painter,
-    Compositor, 
-    meta_brushes,
-    background_color: str = 'black',
-):
+        image,
+        num_strokes: int,
+        Painter,
+        Compositor, 
+        meta_brushes,
+        background_color: str = 'black',
+    ):
     # Size 512 x 512
     WIDTH = 512
     steps = num_strokes // 5
@@ -100,9 +104,7 @@ def run_pipeline_by_size(
     boxes0 = []
     boxes1 = []
     params = []
-
     losses = 0
-    loss_fn = torch.nn.MSELoss()
     
     for i in tqdm(range(steps)):
         box = Compositor(torch.cat([canvas, image], dim=1))
@@ -133,22 +135,24 @@ def run_pipeline_by_size(
         canvas += 1.
     canvas, images_list = final_decode(canvas, boxes0, boxes1, params, 
                                         meta_brushes, recursive_number)
-    return canvas, images_list, boxes0, boxes1, params
+    return canvas, images_list, (boxes0, boxes1, params)
 
 
 def run_pipeline_by_block(
-    image,
-    num_strokes: int,
-    Painter, 
-    meta_brushes,
-    background_color: str = 'black',
-):
-    # Block: 5 x 5
-    K = 5
+        image,
+        num_strokes: int,
+        Painter, 
+        meta_brushes,
+        background_color: str = 'black',
+        K: int = 8,
+    ):
+    # Block
     canvas_cnt = K * K
-    origin_shape = (512, 512)
 
     WIDTH = 128
+    origin_shape = (512, 512)
+    images_list = []
+    guidelines = []
 
     canvas = torch.zeros([1, 3, WIDTH, WIDTH]).to(device=DEVICE)
     if background_color.lower() == 'white':
@@ -167,9 +171,18 @@ def run_pipeline_by_block(
 
     steps = num_strokes // (canvas_cnt + 1)
 
-    for i in range(steps):
+    for i in tqdm(range(steps)):
         actions = Painter(torch.cat([canvas, image], dim=1))
-        canvas, images_list = decode3(actions, canvas, meta_brushes)
+        canvas, canvas_list = decode3(actions, canvas, meta_brushes)
+        guidelines.append(actions)
+
+        for c in canvas_list:
+            img = c.detach().cpu().numpy()  # d * d, 3, width, width
+            img = np.transpose(img, (0, 2, 3, 1))[0]
+            # img = small2large(img, WIDTH, K)
+            img = (img * 255).astype('uint8')
+            img = cv2.resize(img, origin_shape)
+            images_list.append(img)
 
     canvas = canvas[0].detach().cpu().numpy()
     canvas = np.transpose(canvas, (1, 2, 0))
@@ -178,32 +191,35 @@ def run_pipeline_by_block(
     canvas = np.transpose(canvas, (0, 3, 1, 2))
     canvas = torch.tensor(canvas).to(device=DEVICE).float()
     
-    for i in range(steps):
+    for i in tqdm(range(steps)):
         actions = Painter(torch.cat([canvas, patch_img], dim=1))
-        canvas, images_list = decode3(actions, canvas, meta_brushes)
+        canvas, canvas_list = decode3(actions, canvas, meta_brushes)
+        guidelines.append(actions)
     
-    pixel_loss = loss_mse(canvas, patch_img)
+        for c in canvas_list:
+            img = c.detach().cpu().numpy()  # d * d, 3, width, width
+            img = np.transpose(img, (0, 2, 3, 1))
+            img = small2large(img, WIDTH, K)
+            img = (img * 255).astype('uint8')
+            img = cv2.resize(img, origin_shape)
+            images_list.append(img)
+    
+    pixel_loss = loss_fn(canvas, patch_img)
     print('MSE Distance: ', pixel_loss)
-    
-    output = res[-1].detach().cpu().numpy()  # d * d, 3, width, width
-    output = np.transpose(output, (0, 2, 3, 1))
-    output = small2large(output, WIDTH, K)
-    output = (output * 255).astype('uint8')
-    output = cv2.resize(output, origin_shape)
 
-    return output, []
+    return canvas, images_list, guidelines
 
 
 def run_pipeline(
-    image,
-    meta_brushes,
-    Painter,
-    Compositor,
-    num_strokes: int = 5_000,
-    background_color: str = 'black',
-    out_dir: str = './results',
-    video_clip: bool = True,
-):
+        image,
+        meta_brushes,
+        Painter,
+        Compositor,
+        num_strokes: int = 5_000,
+        background_color: str = 'black',
+        out_dir: str = './results',
+        video_clip: bool = True,
+    ):
     #    Painter for `run_pipeline_by_size` 
     # Compositor for `run_pipeline_by_block`
     assert (Painter is not None) or (Compositor is not None)
@@ -214,10 +230,11 @@ def run_pipeline(
 
     if Compositor is not None:
         canvas, images_list, \
-        boxes0, boxes1, params = run_pipeline_by_size(image, num_strokes, Painter, Compositor, meta_brushes, background_color)
+            guidelines = run_pipeline_by_size(image, num_strokes, Painter, Compositor, meta_brushes, background_color)
 
     elif Painter is not None:
-        canvas, images_list = run_pipeline_by_block(image, num_strokes, Painter, meta_brushes, background_color)
+        canvas, images_list, \
+            guidelines = run_pipeline_by_block(image, num_strokes, Painter, meta_brushes, background_color, K=19)
 
     if video_clip:
         fps = 10
@@ -226,21 +243,22 @@ def run_pipeline(
         video_writer = cv2.VideoWriter(f'{out_dir}/out.mp4', video_format, fps, size)
 
     for i in tqdm(range(len(images_list))):
-        if i > 1_000 and i % 25 != 0:
+        if i > 1_000 and (i+1) % 25 != 0:
             continue
-        elif i > 100 and i % 10 != 0:
+        elif i > 100 and (i+1) % 10 != 0:
             continue
         frame = images_list[i]
         cv2.imwrite(f'{out_dir}/out_{i:04d}.png', frame)
         if video_clip:
             video_writer.write(frame)
 
-    save_image(canvas[:, [2, 1, 0]], 'output.png', nrow=1, normalize=False)
+    if isinstance(canvas, torch.Tensor):
+        save_image(canvas[:, [2, 1, 0]], 'output.png', nrow=1, normalize=False)
 
     if video_clip:
         video_writer.release()
 
-    return images_list, (boxes0, boxes1, params)
+    return images_list, guidelines
 
 
 if __name__ == "__main__":
@@ -250,8 +268,9 @@ if __name__ == "__main__":
     renderer_ckpt_path = './checkpoints/paint_doublew/renderer.pkl'
     compositor_ckpt_path = './checkpoints/paint_doublew/compositor.pkl'
     Painter, Compositor, Renderer = load_models(painter_ckpt_path, compositor_ckpt_path, None)
+    Compositor = None
 
-    meta_brushes = load_brushes('brush_small').to(device=DEVICE)
+    meta_brushes = load_brushes('brush_large').to(device=DEVICE)
 
     # Load image
     # image_path = "C:/Users/Mr. RIAH/Pictures/_character/Nancy-Closeup.jpg"
@@ -271,12 +290,12 @@ if __name__ == "__main__":
 
     # Run pipeline
     # out_dir = f'./results/nancy_{image_size}'
-    out_dir = f'F:/Document/Artwork/_ghostories_/output/duong-di-ha-giang-1-picasso_{image_size}S_doublew_R{r}C{c}'
+    out_dir = f'F:/Document/Artwork/_ghostories_/output/duong-di-ha-giang-1-picasso_{image_size}L_doublew_3x4/woCx8/R{r}C{c}'
     
     with torch.no_grad():
         images_list, \
         guidelines = run_pipeline(image, meta_brushes, Painter, Compositor,
-                                  out_dir = out_dir, num_strokes = 25_000,
+                                  out_dir = out_dir, num_strokes = 100_000,
                                                 background_color = 'white')
 
     # Save guidance

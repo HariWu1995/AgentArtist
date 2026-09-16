@@ -77,14 +77,14 @@ def decode_oil(meta_brushes, x, size=512):
 
 
 def decode(
-    Painter, 
-    meta_brushes, 
-    box, 
-    params,
-    canvas, 
-    tgt_canvas, 
-    debug=False,
-):  
+        Painter, 
+        meta_brushes, 
+        box, 
+        params,
+        canvas, 
+        tgt_canvas, 
+        debug=False,
+    ):  
     # b * (10 + 3)
     ori_canvas = canvas.clone()
     canvas     = resize_128(canvas)
@@ -120,13 +120,13 @@ def decode(
 
 
 def final_decode(
-    canvas,
-    boxes0, 
-    boxes1, 
-    params, 
-    meta_brushes,
-    recursive_number: int,
-):
+        canvas,
+        boxes0, 
+        boxes1, 
+        params, 
+        meta_brushes,
+        recursive_number: int,
+    ):
     # canvas = torch.zeros(1, 3, WIDTH_OUT, WIDTH_OUT).cuda()
     images_list = []
 
