@@ -1,4 +1,7 @@
 import os
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
+
 from tqdm import tqdm
 
 import cv2
@@ -103,17 +106,17 @@ def init_aux(width: int = WIDTH):
 
 
 def run_pipeline(
-        painter, 
-        renderer,
-        image: np.ndarray,
-        width: int = WIDTH, 
-        division: int = 4,
-       lowres_step: int = 50,
-        hires_step: int = 10,
-        verbose: bool = False,
-        out_dir: str = './results',
-        background_color: str = 'black',
-    ):
+    painter, 
+    renderer,
+    image: np.ndarray,
+    width: int = WIDTH, 
+    division: int = 4,
+    lowres_step: int = 50,
+    hires_step: int = 10,
+    verbose: bool = False,
+    out_dir: str = './results',
+    background_color: str = 'black',
+):
 
     if not os.path.isdir(out_dir):
         os.makedirs(out_dir)
@@ -239,16 +242,16 @@ if __name__ == "__main__":
     # Load image
     # image_path = "C:/Users/Mr. RIAH/Pictures/_character/Nancy-Closeup.jpg"
     # image_path = "./samples/van-gogh-garden-at-arles.png"
-    image_path = "F:/Document/Artwork/_ghostories_/styles/duong-di-ha-giang-1-flatillustration.jpg"
+    image_path = "F:/Document/Artwork/_ghostories_/styles/duong-di-ha-giang-35-ghibli.jpg"
     image_size = 2048
     image_bg = (255, 255, 255) # (255, 255, 255) for white, (0, 0, 0) for black
     image = cv2.imread(image_path, cv2.IMREAD_COLOR)
-    image = cv2.copyMakeBorder(image, (2048-1365)//2, (2048-1365)//2, 0, 0, borderType=cv2.BORDER_CONSTANT, value=image_bg)
+    image = cv2.copyMakeBorder(image, (2048-1150)//2, (2048-1150)//2, 0, 0, borderType=cv2.BORDER_CONSTANT, value=image_bg)
     image = cv2.resize(image, (image_size, image_size))
 
     # Run pipeline
     division = int(image_size / WIDTH)
-    out_dir = f'F:/Document/Artwork/_ghostories_/output/duong-di-ha-giang-1-flatillustration_{image_size}'
+    out_dir = f'F:/Document/Artwork/_ghostories_/output/duong-di-ha-giang-35-ghibli_{image_size}'
     # out_dir = f'./results/nancy_{image_size}'
     with torch.no_grad():
         images_list, \

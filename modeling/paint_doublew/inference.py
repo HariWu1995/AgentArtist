@@ -40,10 +40,10 @@ loss_fn = torch.nn.MSELoss()
 #################################
 
 def load_models(
-        path_to_painter: str = None, 
-        path_to_compositor: str = None,
-        path_to_renderer: str = None,
-    ):
+    path_to_painter: str = None, 
+    path_to_compositor: str = None,
+    path_to_renderer: str = None,
+):
     # Load painter (actor) model -> ResNet 18
     #               action bundle = 5, 
     #               color channel = 3,
@@ -74,13 +74,13 @@ def load_models(
 
 
 def run_pipeline_by_size(
-        image,
-        num_strokes: int,
-        Painter,
-        Compositor, 
-        meta_brushes,
-        background_color: str = 'black',
-    ):
+    image,
+    num_strokes: int,
+    Painter,
+    Compositor, 
+    meta_brushes,
+    background_color: str = 'black',
+):
     # Size 512 x 512
     WIDTH = 512
     steps = num_strokes // 5
@@ -139,13 +139,13 @@ def run_pipeline_by_size(
 
 
 def run_pipeline_by_block(
-        image,
-        num_strokes: int,
-        Painter, 
-        meta_brushes,
-        background_color: str = 'black',
-        K: int = 8,
-    ):
+    image,
+    num_strokes: int,
+    Painter, 
+    meta_brushes,
+    background_color: str = 'black',
+    K: int = 8,
+):
     # Block
     canvas_cnt = K * K
 
@@ -211,15 +211,15 @@ def run_pipeline_by_block(
 
 
 def run_pipeline(
-        image,
-        meta_brushes,
-        Painter,
-        Compositor,
-        num_strokes: int = 5_000,
-        background_color: str = 'black',
-        out_dir: str = './results',
-        video_clip: bool = True,
-    ):
+    image,
+    meta_brushes,
+    Painter,
+    Compositor,
+    num_strokes: int = 5_000,
+    background_color: str = 'black',
+    out_dir: str = './results',
+    video_clip: bool = True,
+):
     #    Painter for `run_pipeline_by_size` 
     # Compositor for `run_pipeline_by_block`
     assert (Painter is not None) or (Compositor is not None)
@@ -243,10 +243,10 @@ def run_pipeline(
         video_writer = cv2.VideoWriter(f'{out_dir}/out.mp4', video_format, fps, size)
 
     for i in tqdm(range(len(images_list))):
-        if i > 1_000 and (i+1) % 25 != 0:
-            continue
-        elif i > 100 and (i+1) % 10 != 0:
-            continue
+        # if i > 1_369 and (i+1) % 10 != 0:
+        #     continue
+        # elif i > 100 and (i+1) % 5 != 0:
+        #     continue
         frame = images_list[i]
         cv2.imwrite(f'{out_dir}/out_{i:04d}.png', frame)
         if video_clip:
@@ -275,28 +275,32 @@ if __name__ == "__main__":
     # Load image
     # image_path = "C:/Users/Mr. RIAH/Pictures/_character/Nancy-Closeup.jpg"
     # image_path = "./samples/van-gogh-garden-at-arles.png"
-    image_path = "F:/Document/Artwork/_ghostories_/styles/duong-di-ha-giang-1-picasso.jpg"
+    image_path = "F:/Document/Artwork/_ghostories_/styles/duong-di-ha-giang-35-monet.jpg"
     image_size = 512
     image_bg = (255, 255, 255) # (255, 255, 255) for white, (0, 0, 0) for black
     image = cv2.imread(image_path, cv2.IMREAD_COLOR)
-    image = cv2.copyMakeBorder(image, (1536-1365)//2, (1536-1365)//2, 0, 0, borderType=cv2.BORDER_CONSTANT, value=image_bg)
+    image = cv2.copyMakeBorder(image, (1536-1152)//2, (1536-1152)//2, 0, 0, borderType=cv2.BORDER_CONSTANT, value=image_bg)
     # image = cv2.resize(image, (image_size, image_size))
 
     H, W = image.shape[:2]  # H = 1536 = 3 * 512 / W = 2048 = 4 * 512
-    r, c = 3, 4
-    image = image[512*(r-1):512*r, 512*(c-1):512*c]
-    # image = cv2.copyMakeBorder(image, 1024-682, 0, 0, 0, borderType=cv2.BORDER_CONSTANT, value=image_bg)
-    image = cv2.resize(image, (image_size, image_size))
+    r, c = 3, 3
 
-    # Run pipeline
-    # out_dir = f'./results/nancy_{image_size}'
-    out_dir = f'F:/Document/Artwork/_ghostories_/output/duong-di-ha-giang-1-picasso_{image_size}L_doublew_3x4/woCx8/R{r}C{c}'
-    
-    with torch.no_grad():
-        images_list, \
-        guidelines = run_pipeline(image, meta_brushes, Painter, Compositor,
-                                  out_dir = out_dir, num_strokes = 100_000,
-                                                background_color = 'white')
+    import itertools
+    for r,c in itertools.product([1,2,3], [1,2,3,4]):
+
+        img = image[512*(r-1):512*r, 512*(c-1):512*c]
+        # imaimgge = cv2.copyMakeBorder(image, 1024-682, 0, 0, 0, borderType=cv2.BORDER_CONSTANT, value=image_bg)
+        img = cv2.resize(img, (image_size, image_size))
+
+        # Run pipeline
+        # out_dir = f'./results/nancy_{image_size}'
+        out_dir = f'F:/Document/Artwork/_ghostories_/output/duong-di-ha-giang-35-monet_{image_size}L_doublew_3x4/woCx8/R{r}C{c}'
+
+        with torch.no_grad():
+            images_list, \
+            guidelines = run_pipeline(img, meta_brushes, Painter, Compositor,
+                                    out_dir = out_dir, num_strokes = 100_000,
+                                                    background_color = 'white')
 
     # Save guidance
     #   num_lines = num_actions * (lowres_step + hires_step * (resolution / width)**2)

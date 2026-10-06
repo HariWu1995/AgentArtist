@@ -13,11 +13,11 @@ WIDTH = 128
 
 
 def reproduce(
-        guidelines: pd.DataFrame, 
-        video_path: str = None,
-        frame_size: int = 512,
-        frame_per_sec: int = 5, 
-    ):
+    guidelines: pd.DataFrame, 
+    video_path: str = None,
+    frame_size: int = 512,
+    frame_per_sec: int = 5, 
+):
     """
     Arguments:
         guidelines: List of params (step,division,patch,x0,y0,x1,y1,x2,y2,z0,z2,w0,w2,r,g,b)
@@ -80,7 +80,7 @@ def reproduce(
 
 if __name__ == "__main__":
 
-    gen_dir = f'F:/Document/Artwork/_ghostories_/output/duong-di-ha-giang-1-flatillustration_2048'
+    gen_dir = f'F:/Document/Artwork/_ghostories_/output/duong-di-ha-giang-35-ghibli_2048'
     video_path = f'{gen_dir}/out.mp4'
 
     video_fps = 20
